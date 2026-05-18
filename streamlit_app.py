@@ -51,9 +51,10 @@ else:
     with top_col2:
 
         logout_button = st.button(
-            "Cerrar sesión",
-            use_container_width=True,
-            key="logout_button"
+        "Cerrar sesión",
+        type="secondary",
+        use_container_width=True,
+        key="logout_button"
         )
 
         st.markdown("""
