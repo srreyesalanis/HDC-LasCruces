@@ -52,7 +52,7 @@ else:
 
         logout_button = st.button(
         "Cerrar sesión",
-        type="close",
+        type="primary",
         use_container_width=True,
         key="logout_button"
         )
@@ -61,12 +61,12 @@ else:
         <style>
 
         /* SOLO BOTON CON KEY logout_button */
-        button[kind="close"][data-testid="baseButton-secondary"] {
+        button[kind="primary"][data-testid="baseButton-secondary"] {
             background-color: #d32f2f !important;
             color: white !important;
         }
 
-        button[kind="close"][data-testid="baseButton-secondary"]:hover {
+        button[kind="primary"][data-testid="baseButton-secondary"]:hover {
             background-color: #b71c1c !important;
             color: white !important;
         }
