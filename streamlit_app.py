@@ -75,14 +75,16 @@ else:
 
     with top_col2:
 
-        logout_button = st.button(
-        "Cerrar sesión",
-        type="primary",
-        use_container_width=True,
-        key="logout_button"
+            st.markdown('<div class="red-button">', unsafe_allow_html=True)
+
+            logout_button = st.button(
+            "Cerrar sesión",
+            use_container_width=True
         )
 
-        if logout_button:
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    if logout_button:
 
             supabase.auth.sign_out()
 
