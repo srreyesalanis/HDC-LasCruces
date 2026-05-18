@@ -93,7 +93,7 @@ else:
             st.session_state["page"] = "crear_jugador"
 
     with col2:
-        if st.button("🏌️ Crear Ronda", type="primary"):
+        if st.button("🏌️ Crear Ronda", type="primary", use_container_width="True"):
             st.session_state["page"] = "crear_ronda"
 
     st.markdown("---")
