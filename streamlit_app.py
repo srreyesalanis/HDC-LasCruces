@@ -61,10 +61,25 @@ if st.session_state.get("page") == "crear_ronda":
 
     st.header("🏌️ Nueva Ronda")
 
-    jugador = st.selectbox(
-        "Jugador",
-        ["Roberto", "Juan", "Pedro"]
-    )
+    # Obtener jugadores desde Supabase
+    players_response = supabase.table("players").select("*").execute()
+
+    players = players_response.data
+
+    # Crear diccionario nombre -> id
+    player_options = {
+     player["name"]: player["id"]
+     for player in players
+    }
+
+    # Selectbox
+    selected_player_name = st.selectbox(
+      "Jugador",
+        list(player_options.keys())
+)
+
+    # Obtener UUID del jugador seleccionado
+    player_id = player_options[selected_player_name]
 
     hoyo = st.number_input(
         "Hoyo",
