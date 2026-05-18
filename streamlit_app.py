@@ -57,17 +57,20 @@ else:
         )
 
         st.markdown("""
-            <style>
-            button[kind="secondary"] {
-                background-color: #d32f2f !important;
-                color: white !important;
-            }
+                    <style>
 
-            button[kind="secondary"]:hover {
-                background-color: #b71c1c !important;
-                color: white !important;
-            }
-            </style>
+        /* SOLO BOTON LOGOUT */
+        div[data-testid="stButton"] button[kind="secondary"] {
+            background-color: #d32f2f !important;
+            color: white !important;
+        }
+
+        div[data-testid="stButton"] button[kind="secondary"]:hover {
+            background-color: #b71c1c !important;
+            color: white !important;
+        }
+
+        </style>
         """, unsafe_allow_html=True)
 
         if logout_button:
