@@ -45,34 +45,32 @@ if st.session_state.user is None:
 # APP
 else:
 
-    # BOTON LOGOUT ARRIBA DERECHA
+    # LOGOUT ARRIBA DERECHA
     top_col1, top_col2 = st.columns([8, 1])
 
     with top_col2:
 
-        st.markdown(
-            """
-            <style>
-            div.stButton > button:first-child {
-                background-color: #d32f2f;
-                color: white;
-                border-radius: 8px;
-                border: none;
-                height: 40px;
-                width: 100%;
-                font-weight: bold;
-            }
-
-            div.stButton > button:first-child:hover {
-                background-color: #b71c1c;
-                color: white;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
+        logout_button = st.button(
+            "Cerrar sesión",
+            use_container_width=True,
+            key="logout_button"
         )
 
-        if st.button("Cerrar sesión"):
+        st.markdown("""
+            <style>
+            button[kind="secondary"] {
+                background-color: #d32f2f !important;
+                color: white !important;
+            }
+
+            button[kind="secondary"]:hover {
+                background-color: #b71c1c !important;
+                color: white !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        if logout_button:
 
             supabase.auth.sign_out()
 
