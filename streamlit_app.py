@@ -70,6 +70,16 @@ else:
             background-color: #b71c1c !important;
             color: white !important;
         }
+                            /* SOLO BOTON CON KEY logout_button */
+        button[kind="secondary"][data-testid="baseButton-secondary"] {
+            background-color: #2e7d32 !important;
+            color: white !important;
+        }
+
+        button[kind="secondary"][data-testid="baseButton-secondary"]:hover {
+            background-color: #1b5e20 !important;
+            color: white !important;
+        }
 
         </style>
         """, unsafe_allow_html=True)
