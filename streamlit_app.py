@@ -44,37 +44,37 @@ if st.session_state.user is None:
 
 # APP
 else:
-    st.markdown("""
-        <style>
-
-       .red-button button {
-        background-color: #d32f2f !important;
-        color: white !important;
-        }
-
-        .red-button button:hover {
-            background-color: #b71c1c !important;
-            color: white !important;
-        }
-
-        .green-button button {
-            background-color: #2e7d32 !important;
-            color: white !important;
-        }
-
-        .green-button button:hover {
-            background-color: #1b5e20 !important;
-            color: white !important;
-        }
-
-        </style>
-        """, unsafe_allow_html=True)
-
     # LOGOUT ARRIBA DERECHA
     top_col1, top_col2 = st.columns([8, 1])
 
     with top_col2:
 
+            st.markdown("""
+                <style>
+
+            .red-button button {
+                background-color: #d32f2f !important;
+                color: white !important;
+                }
+
+                .red-button button:hover {
+                    background-color: #b71c1c !important;
+                    color: white !important;
+                }
+
+                .green-button button {
+                    background-color: #2e7d32 !important;
+                    color: white !important;
+                }
+
+                .green-button button:hover {
+                    background-color: #1b5e20 !important;
+                    color: white !important;
+                }
+
+                </style>
+                """, unsafe_allow_html=True)
+            
             st.markdown('<div class="red-button">', unsafe_allow_html=True)
 
             logout_button = st.button(
