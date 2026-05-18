@@ -7,7 +7,7 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("⛳ Golf Handicap System")
+st.title("⛳ Golf Handicap - Las Cruces")
 
 st.markdown("---")
 
