@@ -57,15 +57,15 @@ else:
         )
 
         st.markdown("""
-                    <style>
+        <style>
 
-        /* SOLO BOTON LOGOUT */
-        div[data-testid="stButton"] button[kind="secondary"] {
+        /* SOLO BOTON CON KEY logout_button */
+        button[kind="secondary"][data-testid="baseButton-secondary"] {
             background-color: #d32f2f !important;
             color: white !important;
         }
 
-        div[data-testid="stButton"] button[kind="secondary"]:hover {
+        button[kind="secondary"][data-testid="baseButton-secondary"]:hover {
             background-color: #b71c1c !important;
             color: white !important;
         }
