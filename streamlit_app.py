@@ -10,7 +10,7 @@ key = st.secrets["SUPABASE_KEY"]
 
 supabase = create_client(url, key)
 
-st.title("⛳ Golf Handicap")
+st.title("⛳ Golf Handicap - Las Cruces")
 
 # Session state
 if "user" not in st.session_state:
@@ -49,8 +49,6 @@ else:
         f"Bienvenido {st.session_state.user.email}"
         
     )
-    st.title("⛳ Golf Handicap - Las Cruces")
-
     st.markdown("---")
 
     st.subheader("Menú Principal")
