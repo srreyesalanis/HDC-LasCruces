@@ -8,7 +8,15 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 st.title("Golf Handicap")
 
-rounds = supabase.table("players").select("*").execute()
+course = st.selectbox("Campo", ["Las Cruces"])
 
-st.write(rounds)
-st.write(rounds.data)
+score = st.number_input("Score Hoyo 1", min_value=1, max_value=15)
+
+if st.button("Guardar Round"):
+    supabase.table("round_holes").insert({
+        "round_id": 1,
+        "hole_number": 1,
+        "strokes": score
+    }).execute()
+
+    st.success("Guardado")
