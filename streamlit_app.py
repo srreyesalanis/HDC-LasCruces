@@ -45,6 +45,7 @@ if st.session_state.user is None:
 # APP
 else:
 
+
     st.success(
         f"Bienvenido {st.session_state.user.email}"
         
@@ -53,4 +54,5 @@ else:
     page_title="Golf Handicap",
     page_icon="⛳",
     layout="centered"
+    
 )
