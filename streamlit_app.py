@@ -1,5 +1,7 @@
 
 import streamlit as st
+import pandas as pd
+
 
 st.set_page_config(
     page_title="Golf Handicap",
@@ -88,21 +90,43 @@ if st.session_state.get("page") == "crear_ronda":
     # Obtener UUID del jugador seleccionado
     player_id = player_options[selected_player_name]
 
-    hoyo = st.number_input(
-        "Hoyo",
-        min_value=1,
-        max_value=18,
-        step=1
+    # FRONT 9
+    front_df = pd.DataFrame({
+        "Hoyo": [1,2,3,4,5,6,7,8,9],
+        "Score": [0,0,0,0,0,0,0,0,0]
+    })
+
+    # BACK 9
+    back_df = pd.DataFrame({
+        "Hoyo": [10,11,12,13,14,15,16,17,18],
+        "Score": [0,0,0,0,0,0,0,0,0]
+    })
+
+    st.subheader("Front 9")
+
+    front_scores = st.data_editor(
+        front_df,
+        hide_index=True,
+        use_container_width=True
     )
 
-    golpes = st.number_input(
-        "Golpes",
-        min_value=1,
-        max_value=15,
-        step=1
+    st.subheader("Back 9")
+
+    back_scores = st.data_editor(
+        back_df,
+        hide_index=True,
+        use_container_width=True
     )
 
-    if st.button("Guardar Ronda"):
+    # Totales
+    front_total = front_scores["Score"].sum()
+    back_total = back_scores["Score"].sum()
 
-        # AQUI VA TU INSERT A SUPABASE
-        st.success("Ronda guardada correctamente")
+    total = front_total + back_total
+
+    st.markdown("---")
+
+    st.write(f"Front: {front_total}")
+    st.write(f"Back: {back_total}")
+    st.write(f"Total: {total}")
+    
