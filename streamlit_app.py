@@ -129,4 +129,22 @@ if st.session_state.get("page") == "crear_ronda":
     st.write(f"Front: {front_total}")
     st.write(f"Back: {back_total}")
     st.write(f"Total: {total}")
-    
+    if st.button("Guardar Ronda"):
+
+    for _, row in front_scores.iterrows():
+
+        supabase.table("round_holes").insert({
+            "round_id": round_id,
+            "hole_number": int(row["Hoyo"]),
+            "strokes": int(row["Score"])
+        }).execute()
+
+    for _, row in back_scores.iterrows():
+
+        supabase.table("round_holes").insert({
+            "round_id": round_id,
+            "hole_number": int(row["Hoyo"]),
+            "strokes": int(row["Score"])
+        }).execute()
+
+    st.success("Ronda guardada")
