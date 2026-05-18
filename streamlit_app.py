@@ -1,6 +1,13 @@
 import streamlit as st
+from supabase import create_client
 
-st.title("🎈 My new app")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+st.title("Golf Handicap")
+
+rounds = supabase.table("players").select("*").execute()
+
+st.write(rounds.data)
