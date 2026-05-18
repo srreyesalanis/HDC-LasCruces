@@ -10,4 +10,5 @@ st.title("Golf Handicap")
 
 rounds = supabase.table("players").select("*").execute()
 
+st.write(rounds)
 st.write(rounds.data)
