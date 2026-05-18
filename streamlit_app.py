@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 
@@ -44,47 +43,47 @@ if st.session_state.user is None:
 
 # APP
 else:
+
     # LOGOUT ARRIBA DERECHA
     top_col1, top_col2 = st.columns([8, 1])
 
     with top_col2:
 
-            st.markdown("""
-                <style>
-
-            .red-button button {
-                background-color: #d32f2f !important;
-                color: white !important;
-                }
-
-                .red-button button:hover {
-                    background-color: #b71c1c !important;
-                    color: white !important;
-                }
-
-                .green-button button {
-                    background-color: #2e7d32 !important;
-                    color: white !important;
-                }
-
-                .green-button button:hover {
-                    background-color: #1b5e20 !important;
-                    color: white !important;
-                }
-
-                </style>
-                """, unsafe_allow_html=True)
-            
-            st.markdown('<div class="red-button">', unsafe_allow_html=True)
-
-            logout_button = st.button(
-            "Cerrar sesión",
-            use_container_width=True
+        logout_button = st.button(
+        "Cerrar sesión",
+        type="primary",
+        use_container_width=True,
+        key="logout_button"
         )
 
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <style>
 
-    if logout_button:
+        /* SOLO BOTON CON KEY logout_button */
+        button[kind="primary"][data-testid="baseButton-primary"] {
+            background-color: #d32f2f !important;
+            color: white !important;
+        }
+
+        button[kind="primary"][data-testid="baseButton-primary"]:hover {
+            background-color: #b71c1c !important;
+            color: white !important;
+        }
+
+        button[kind="secondary"][data-testid="baseButton-secondary"] {
+            background-color: #2e7d32 !important;
+            color: white !important;
+        }
+
+        button[kind="secondary"][data-testid="baseButton-secondary"]:hover {
+            background-color: #1b5e20 !important;
+            color: white !important;
+        }
+
+        </style>
+        """, unsafe_allow_html=True)
+
+        if logout_button:
 
             supabase.auth.sign_out()
 
