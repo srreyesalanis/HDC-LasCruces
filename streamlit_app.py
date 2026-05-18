@@ -43,7 +43,18 @@ if st.session_state.get("page") == "crear_jugador":
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
-        st.success(f"Jugador {nombre} creado correctamente")
+        try:
+
+                response = supabase.table("players").insert({
+                    "name": name,
+                    "email": email
+                }).execute()
+
+                st.success("Jugador creado")
+                st.write(response.data)
+
+            except Exception as e:
+                st.error(str(e))
 
 # PAGINA CREAR RONDA
 if st.session_state.get("page") == "crear_ronda":
