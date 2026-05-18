@@ -61,16 +61,16 @@ else:
         <style>
 
         /* SOLO BOTON CON KEY logout_button */
-        button[kind="primary"][data-testid="baseButton-secondary"] {
+        button[kind="primary"][data-testid="baseButton-primary"] {
             background-color: #d32f2f !important;
             color: white !important;
         }
 
-        button[kind="primary"][data-testid="baseButton-secondary"]:hover {
+        button[kind="primary"][data-testid="baseButton-primary"]:hover {
             background-color: #b71c1c !important;
             color: white !important;
         }
-                            /* SOLO BOTON CON KEY logout_button */
+
         button[kind="secondary"][data-testid="baseButton-secondary"] {
             background-color: #2e7d32 !important;
             color: white !important;
