@@ -1,57 +1,21 @@
 import streamlit as st
 from supabase import create_client
-from datetime import datetime
 
-# Conexion
-url = st.secrets["SUPABASE_URL"]
-key = st.secrets["SUPABASE_KEY"]
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
-supabase = create_client(url, key)
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-st.title("Nuevo Round")
+st.title("Golf Handicap")
 
-# DATOS DE EJEMPLO
-player_id = "UUID_DEL_PLAYER"
-course_id = "UUID_DEL_CURSO"
+course = st.selectbox("Campo", ["Las Cruces"])
 
-hole_number = st.number_input(
-    "Hoyo",
-    min_value=1,
-    max_value=18,
-    step=1
-)
-
-strokes = st.number_input(
-    "Golpes",
-    min_value=1,
-    max_value=15,
-    step=1
-)
+score = st.number_input("Score Hoyo 1", min_value=1, max_value=15)
 
 if st.button("Guardar Round"):
+    supabase.table("round_holes").insert({
+        "hole_number": 1,
+        "strokes": score
+    }).execute()
 
-    try:
-
-        # 1. Crear round
-        round_response = supabase.table("rounds").insert({
-            "player_id": player_id,
-            "course_id": course_id,
-            "played_at": datetime.now().isoformat()
-        }).execute()
-
-        # 2. Obtener round_id
-        round_id = round_response.data[0]["id"]
-
-        # 3. Guardar hoyo
-        hole_response = supabase.table("round_holes").insert({
-            "round_id": round_id,
-            "hole_number": hole_number,
-            "strokes": strokes
-        }).execute()
-
-        st.success("Round guardado")
-
-        st.write(hole_response.data)
-
-    except Exception as e:
-        st.error(str(e))
+    st.success("Guardado")
