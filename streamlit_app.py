@@ -53,7 +53,7 @@ if st.session_state.get("page") == "crear_jugador":
                 st.success("Jugador creado")
                 st.write(response.data)
 
-            except Exception as e:
+        except Exception as e:
                 st.error(str(e))
 
 # PAGINA CREAR RONDA
