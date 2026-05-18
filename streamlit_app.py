@@ -73,33 +73,3 @@ if st.session_state.get("page") == "crear_ronda":
 
         # AQUI VA TU INSERT A SUPABASE
         st.success("Ronda guardada correctamente")
-```
-
-## Resultado
-
-La app mostrará:
-
-* Botón "Crear Jugador"
-* Botón "Crear Ronda"
-* Formularios simples
-* Navegación básica usando `session_state`
-
-## Ejecutar localmente
-
-```bash
-streamlit run streamlit_app.py
-```
-
-## Siguiente mejora recomendada
-
-Conectar los botones a Supabase usando:
-
-```python
-supabase.table("players").insert()
-```
-
-y:
-
-```python
-supabase.table("rounds").insert()
-```
