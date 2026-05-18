@@ -45,14 +45,159 @@ if st.session_state.user is None:
 # APP
 else:
 
-
     st.success(
         f"Bienvenido {st.session_state.user.email}"
         
     )
-    st.set_page_config(
-    page_title="Golf Handicap",
-    page_icon="⛳",
-    layout="centered"
-    
+st.title("⛳ Golf Handicap - Las Cruces")
+
+st.markdown("---")
+
+st.subheader("Menú Principal")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("👤 Crear Jugador", use_container_width=True):
+        st.session_state["page"] = "crear_jugador"
+
+with col2:
+    if st.button("🏌️ Crear Ronda", use_container_width=True):
+        st.session_state["page"] = "crear_ronda"
+
+st.markdown("---")
+
+# PAGINA CREAR JUGADOR
+if st.session_state.get("page") == "crear_jugador":
+
+    st.header("👤 Nuevo Jugador")
+
+    name = st.text_input("Nombre")
+    email = st.text_input("Email")
+
+    if st.button("Guardar Jugador"):
+
+        from supabase import create_client
+
+        SUPABASE_URL = st.secrets["SUPABASE_URL"]
+        SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
+        try:
+
+                response = supabase.table("players").insert({
+                    "name": name,
+                    "email": email
+                }).execute()
+
+                st.success("Jugador creado")
+                st.write(response.data)
+
+        except Exception as e:
+                st.error(str(e))
+
+# PAGINA CREAR RONDA
+if st.session_state.get("page") == "crear_ronda":
+
+    st.header("🏌️ Nueva Ronda")
+
+    from supabase import create_client
+
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+    # Obtener jugadores desde Supabase
+    players_response = supabase.table("players").select("*").order("name").execute()
+
+    players = players_response.data
+
+    # Crear diccionario nombre -> id
+    player_options = {
+     player["name"]: player["id"]
+     for player in players
+    }
+
+    # Selectbox
+    selected_player_name = st.selectbox(
+      "Jugador",
+        list(player_options.keys())
 )
+
+    # Obtener UUID del jugador seleccionado
+    player_id = player_options[selected_player_name]
+
+    # FRONT 9
+    front_df = pd.DataFrame({
+        "Hoyo": [1,2,3,4,5,6,7,8,9],
+        "Score": [0,0,0,0,0,0,0,0,0]
+    })
+
+    # BACK 9
+    back_df = pd.DataFrame({
+        "Hoyo": [10,11,12,13,14,15,16,17,18],
+        "Score": [0,0,0,0,0,0,0,0,0]
+    })
+
+    st.subheader("Front 9")
+
+    front_scores = st.data_editor(
+        front_df,
+        hide_index=True,
+        use_container_width=True
+    )
+
+    st.subheader("Back 9")
+
+    back_scores = st.data_editor(
+        back_df,
+        hide_index=True,
+        use_container_width=True
+    )
+
+    # Totales
+    front_total = front_scores["Score"].sum()
+    back_total = back_scores["Score"].sum()
+
+    total = front_total + back_total
+
+    st.markdown("---")
+
+    st.write(f"Front: {front_total}")
+    st.write(f"Back: {back_total}")
+    st.write(f"Total: {total}")
+    if st.button("Guardar Ronda"):
+
+        for _, row in front_scores.iterrows():
+
+            supabase.table("round_holes").insert({
+                "round_id": round_id,
+                "hole_number": int(row["Hoyo"]),
+                "strokes": int(row["Score"])
+            }).execute()
+
+        for _, row in back_scores.iterrows():
+
+            supabase.table("round_holes").insert({
+                "round_id": round_id,
+                "hole_number": int(row["Hoyo"]),
+                "strokes": int(row["Score"])
+            }).execute()
+
+        st.success("Ronda guardada")
+
+
+    if st.button("Cerrar sesión"):
+
+        supabase.auth.sign_out()
+
+        st.session_state.user = None
+
+        st.rerun()
+
+
+
+
