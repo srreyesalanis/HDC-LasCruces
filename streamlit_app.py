@@ -30,7 +30,7 @@ if st.session_state.get("page") == "crear_jugador":
 
     st.header("👤 Nuevo Jugador")
 
-    nombre = st.text_input("Nombre")
+    name = st.text_input("Nombre")
     email = st.text_input("Email")
 
     if st.button("Guardar Jugador"):
