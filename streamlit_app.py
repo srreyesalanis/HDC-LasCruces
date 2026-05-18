@@ -69,7 +69,7 @@ if st.session_state.get("page") == "crear_ronda":
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
     # Obtener jugadores desde Supabase
-    players_response = supabase.table("players").select("*").execute()
+    players_response = supabase.table("players").select("*").order("name").execute()
 
     players = players_response.data
 
