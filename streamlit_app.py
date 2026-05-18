@@ -50,7 +50,7 @@ else:
     with top_col2:
 
         logout_button = st.button(
-        "Cerrar sesión",
+        "Cerrar Sesión",
         type="primary",
         use_container_width=True,
         key="logout_button"
