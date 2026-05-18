@@ -45,6 +45,41 @@ if st.session_state.user is None:
 # APP
 else:
 
+    # BOTON LOGOUT ARRIBA DERECHA
+top_col1, top_col2 = st.columns([8, 1])
+
+with top_col2:
+
+    st.markdown(
+        """
+        <style>
+        div.stButton > button:first-child {
+            background-color: #d32f2f;
+            color: white;
+            border-radius: 8px;
+            border: none;
+            height: 40px;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        div.stButton > button:first-child:hover {
+            background-color: #b71c1c;
+            color: white;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if st.button("Cerrar sesión"):
+
+        supabase.auth.sign_out()
+
+        st.session_state.user = None
+
+        st.rerun()
+
     st.success(
         f"Bienvenido {st.session_state.user.email}"
         
@@ -186,15 +221,6 @@ else:
                 }).execute()
 
             st.success("Ronda guardada")
-
-
-        if st.button("Cerrar sesión"):
-
-            supabase.auth.sign_out()
-
-            st.session_state.user = None
-
-            st.rerun()
 
 
 
