@@ -13,10 +13,9 @@ course = st.selectbox("Campo", ["Las Cruces"])
 score = st.number_input("Score Hoyo 1", min_value=1, max_value=15)
 
 if st.button("Guardar Round"):
-    supabase.table("round_holes").insert({
-        "round_id": 1,
-        "hole_number": 1,
-        "strokes": score
+    supabase.table("players").insert({
+        "name": XXX,
+        "email": XXX@xxx.com,
     }).execute()
 
     st.success("Guardado")
