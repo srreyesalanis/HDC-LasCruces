@@ -47,18 +47,7 @@ else:
 
     st.success(
         f"Bienvenido {st.session_state.user.email}"
-    )
-
-    if st.button("Cerrar sesión"):
-
-        supabase.auth.sign_out()
-
-        st.session_state.user = None
-
-        st.rerun()
-
-
-st.set_page_config(
+        st.set_page_config(
     page_title="Golf Handicap",
     page_icon="⛳",
     layout="centered"
@@ -203,3 +192,15 @@ if st.session_state.get("page") == "crear_ronda":
             }).execute()
 
         st.success("Ronda guardada")
+
+    )
+
+    if st.button("Cerrar sesión"):
+
+        supabase.auth.sign_out()
+
+        st.session_state.user = None
+
+        st.rerun()
+
+
