@@ -6,16 +6,22 @@ SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-st.title("Golf Handicap")
+st.title("Nuevo Jugador")
 
-course = st.selectbox("Campo", ["Las Cruces"])
+name = st.text_input("Nombre")
+email = st.text_input("Email")
 
-score = st.number_input("Score Hoyo 1", min_value=1, max_value=15)
+if st.button("Crear jugador"):
 
-if st.button("Guardar Round"):
-    supabase.table("players").insert({
-        "name": XXX,
-        "email": XXX@xxx.com,
-    }).execute()
+    try:
 
-    st.success("Guardado")
+        response = supabase.table("players").insert({
+            "name": name,
+            "email": email
+        }).execute()
+
+        st.success("Jugador creado")
+        st.write(response.data)
+
+    except Exception as e:
+        st.error(str(e))
