@@ -240,6 +240,7 @@ else:
             "player_id": player_id,
             "course_id": selected_course_id,
             "tee_id": selected_tee_id,
+            "played_at": round_date,
             "total_score": int(total),
             "handicap_differential": int(total)
             }).execute()
