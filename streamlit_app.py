@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import uuid
+
 
 from supabase import create_client
 
@@ -187,6 +189,7 @@ else:
         st.write(f"Back: {back_total}")
         st.write(f"Total: {total}")
         if st.button("Guardar Ronda"):
+            round_id = str(uuid.uuid4())
 
             for _, row in front_scores.iterrows():
 
