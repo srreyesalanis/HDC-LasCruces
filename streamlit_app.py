@@ -129,7 +129,7 @@ else:
 
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-                # =========================
+        # =========================
         # CARGAR CAMPOS
         # =========================
         courses = supabase.table("courses").select("*").execute().data
