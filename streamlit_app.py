@@ -261,7 +261,7 @@ else:
             "total_score": total,
             "handicap_differential": total
             
-         }).execute()
+            }).execute()
 
             st.success("Ronda guardada")
 
