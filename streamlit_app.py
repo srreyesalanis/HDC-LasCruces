@@ -155,7 +155,7 @@ else:
             .execute().data
 
         tee_options = {
-            tee["name"]: tee["id"]
+            tee["color"]: tee["id"]
             for tee in tees
         }
 
