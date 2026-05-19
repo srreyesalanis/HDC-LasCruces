@@ -251,16 +251,7 @@ else:
                     "hole_number": int(row["Hoyo"]),
                     "strokes": int(row["Score"])
                 }).execute()
-            
-            supabase.table("rounds").insert({
-            "round_id": round_id,
-            "player_id": player_id,
-            "course_id": selected_course_id,
-            "tee_id": selected_tee_id,
-            "total_score": total,
-            "handicap_differential": total
-            }).execute()
-
+                
             st.success("Ronda guardada")
 
 
