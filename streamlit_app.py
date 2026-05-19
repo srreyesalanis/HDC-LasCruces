@@ -255,8 +255,11 @@ else:
             supabase.table("rounds").insert({
             "id": round_id,
             "player_id": player_id,
-            "course_id": "Las Cruces",
-            "tee_id": "Blancas"
+            "course_id": selected_course_id,
+            "tee_id": selected_tee_id,
+            "played_at": round_date,
+            "total_score": total,
+            "handicap_differential": total
             
         }).execute()
 
