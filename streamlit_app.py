@@ -238,6 +238,7 @@ else:
             round_id = str(uuid.uuid4())
 
             supabase.table("rounds").insert({
+            "round_id": round_id,
             "player_id": player_id,
             "course_id": selected_course_id,
             "tee_id": selected_tee_id,
