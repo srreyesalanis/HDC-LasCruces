@@ -146,6 +146,34 @@ else:
 
         selected_course_id = course_options[selected_course_name]
 
+        # =========================
+        # CARGAR TEES DEL CAMPO
+        # =========================
+        tees = supabase.table("tees") \
+            .select("*") \
+            .eq("course_id", selected_course_id) \
+            .execute().data
+
+        tee_options = {
+            tee["name"]: tee["id"]
+            for tee in tees
+        }
+
+        selected_tee_name = st.selectbox(
+            "Selecciona las Tees",
+            options=list(tee_options.keys())
+        )
+
+        selected_tee_id = tee_options[selected_tee_name]
+
+        # =========================
+        # FECHA DE LA RONDA
+        # =========================
+        round_date = st.date_input(
+            "Fecha de la ronda",
+            value=date.today()
+        )
+
         # Obtener jugadores desde Supabase
         players_response = supabase.table("players").select("*").order("name").execute()
 
