@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import uuid
-
+from datetime import date
 
 from supabase import create_client
 
@@ -129,6 +129,23 @@ else:
 
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+                # =========================
+        # CARGAR CAMPOS
+        # =========================
+        courses = supabase.table("courses").select("*").execute().data
+
+        course_options = {
+            course["name"]: course["id"]
+            for course in courses
+        }
+
+        selected_course_name = st.selectbox(
+            "Selecciona el Campo",
+            options=list(course_options.keys())
+        )
+
+        selected_course_id = course_options[selected_course_name]
+
         # Obtener jugadores desde Supabase
         players_response = supabase.table("players").select("*").order("name").execute()
 
@@ -206,6 +223,14 @@ else:
                     "hole_number": int(row["Hoyo"]),
                     "strokes": int(row["Score"])
                 }).execute()
+            
+            supabase.table("rounds").insert({
+            "id": round_id,
+            "player_id": player_id,
+            "course_id": "Las Cruces",
+            "tee_id": "Blancas"
+            
+        }).execute()
 
             st.success("Ronda guardada")
 
