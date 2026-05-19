@@ -236,6 +236,10 @@ else:
         if st.button("Guardar Ronda"):
             round_id = str(uuid.uuid4())
 
+            supabase.table("rounds").insert({
+            "player_id": player_id,
+            }).execute()
+
             for _, row in front_scores.iterrows():
 
                 supabase.table("round_holes").insert({
@@ -251,7 +255,7 @@ else:
                     "hole_number": int(row["Hoyo"]),
                     "strokes": int(row["Score"])
                 }).execute()
-                
+
             st.success("Ronda guardada")
 
 
