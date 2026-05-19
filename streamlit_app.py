@@ -272,7 +272,7 @@ else:
                 .update({
                     "total_adjusted": adjusted_total
                 }) \
-                .eq("id", round_id) \
+                .eq("round_id", round_id) \
                 .execute()
 
             st.success("Ronda guardada")
