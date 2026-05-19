@@ -238,6 +238,8 @@ else:
 
             supabase.table("rounds").insert({
             "player_id": player_id,
+            "course_id": selected_course_id,
+            "tee_id": selected_tee_id,
             }).execute()
 
             for _, row in front_scores.iterrows():
