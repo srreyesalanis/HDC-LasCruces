@@ -240,8 +240,8 @@ else:
             "player_id": player_id,
             "course_id": selected_course_id,
             "tee_id": selected_tee_id,
-            "total_score": total,
-            "handicap_differential": total
+            "total_score": int(total),
+            "handicap_differential": int(total)
             }).execute()
 
             for _, row in front_scores.iterrows():
