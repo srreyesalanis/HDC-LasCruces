@@ -242,7 +242,7 @@ else:
             "tee_id": selected_tee_id,
             "played_at": str(round_date),
             "total_score": int(total),
-            "handicap_differential": int(total)
+            "total_adjusted": int(total)
             }).execute()
 
             for _, row in front_scores.iterrows():
