@@ -253,13 +253,7 @@ else:
                 }).execute()
             
             supabase.table("rounds").insert({
-            "id": round_id,
-            "player_id": player_id,
-            "course_id": selected_course_id,
-            "tee_id": selected_tee_id,
-            "total_score": total,
-            "handicap_differential": total
-            
+            "id": round_id
             }).execute()
 
             st.success("Ronda guardada")
