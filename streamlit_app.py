@@ -268,9 +268,12 @@ else:
                 round_id
             )
 
-            supabase.table("rounds").insert({
-            "total_adjusted": adjusted_total
-            }).execute()
+            supabase.table("rounds") \
+                .update({
+                    "total_adjusted": adjusted_total
+                }) \
+                .eq("id", round_id) \
+                .execute()
 
             st.success("Ronda guardada")
 
