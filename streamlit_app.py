@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import uuid
 from datetime import date
+from total_adjusted_app import calcular_total_ajustado
 
 from supabase import create_client
 
@@ -242,7 +243,6 @@ else:
             "tee_id": selected_tee_id,
             "played_at": str(round_date),
             "total_score": int(total),
-            "total_adjusted": int(total)
             }).execute()
 
             for _, row in front_scores.iterrows():
@@ -260,6 +260,16 @@ else:
                     "hole_number": int(row["Hoyo"]),
                     "strokes": int(row["Score"])
                 }).execute()
+
+            adjusted_total = calcular_total_ajustado(
+                supabase,
+                selected_course_id,
+                round_id
+            )
+
+            supabase.table("rounds").insert({
+            "total_adjusted": adjusted_total
+            }).execute()
 
             st.success("Ronda guardada")
 
