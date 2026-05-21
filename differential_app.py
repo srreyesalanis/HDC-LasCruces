@@ -5,8 +5,6 @@ def calcular_differential(
     round_id,
     slope_rating
 ):
-    adjusted_total = float(adjusted_total)
-    slope_rating = float(slope_rating)
 
     differential = (
     (adjusted_total - course_rating)
