@@ -4,6 +4,7 @@ import uuid
 from datetime import date
 from total_adjusted_app import calcular_total_ajustado
 from differential_app import calcular_differential
+from handicap_index import calcular_handicap_index
 
 from supabase import create_client
 
@@ -287,6 +288,12 @@ else:
             course_rating,
             round_id,
             slope_rating
+            )
+
+            ###Calcuar HDC del Jugador
+            handicap_index = calcular_handicap_index(
+            supabase,
+            player_id
             )
 
             st.success("Ronda guardada")
