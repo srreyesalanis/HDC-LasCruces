@@ -175,6 +175,7 @@ else:
 
         slope_rating = selected_tee["slope_rating"]
         course_rating = selected_tee["course_rating"]
+        
         st.write(f"Slope Rating: {slope_rating}")
         st.write(f"Course Rating: {course_rating}")
 
