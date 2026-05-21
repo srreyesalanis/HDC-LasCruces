@@ -11,6 +11,7 @@ def calcular_differential(
     * 113
     ) / slope_rating
 
+    differential = round(differential, 1)
     supabase.table("rounds") \
     .update({
     "differential": differential,
