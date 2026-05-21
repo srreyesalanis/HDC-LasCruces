@@ -280,7 +280,9 @@ else:
             adjusted_total = calcular_total_ajustado(
                 supabase,
                 selected_course_id,
-                round_id
+                round_id,
+                course_rating,
+                slope_rating
             )
             
             ###Calcular Diferencial
