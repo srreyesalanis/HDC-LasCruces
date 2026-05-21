@@ -1,10 +1,10 @@
 def calcular_differential(
-    adjusted_score,
+    adjusted_total,
     course_rating,
     slope_rating
 ):
     differential = (
-        (adjusted_score - course_rating)
+        (adjusted_total - course_rating)
         * 113
     ) / slope_rating
 
