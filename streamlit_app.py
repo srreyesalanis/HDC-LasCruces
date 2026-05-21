@@ -281,8 +281,7 @@ else:
                 supabase,
                 selected_course_id,
                 round_id,
-                course_rating,
-                slope_rating
+
             )
             
             ###Calcular Diferencial

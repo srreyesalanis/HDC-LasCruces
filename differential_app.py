@@ -1,8 +1,8 @@
 def calcular_differential(
     supabase,
-    round_id,    
     adjusted_total,
     course_rating,
+    round_id,
     slope_rating
 ):
     adjusted_total = float(adjusted_total)
