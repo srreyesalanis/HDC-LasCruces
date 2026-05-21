@@ -33,4 +33,12 @@ def calcular_total_ajustado(
 
         adjusted_total += adjusted_score
 
+
+    supabase.table("rounds") \
+    .update({
+    "total_adjusted": adjusted_total
+    }) \
+    .eq("round_id", round_id) \
+    .execute()
+
     return adjusted_total

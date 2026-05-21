@@ -282,29 +282,15 @@ else:
                 selected_course_id,
                 round_id
             )
-
-            supabase.table("rounds") \
-                .update({
-                    "total_adjusted": adjusted_total
-                }) \
-                .eq("round_id", round_id) \
-                .execute()
             
             ###Calcular Diferencial
             differential = calcular_differential(
+            supabase,    
             adjusted_total,
             course_rating,
+            round_id,
             slope_rating
             )
-
-            supabase.table("rounds") \
-                .update({
-                    "differential": differential,
-                    "course_rating_used": course_rating,
-                    "slope_rating_used": slope_rating
-                }) \
-                .eq("round_id", round_id) \
-                .execute()
 
             st.success("Ronda guardada")
 
