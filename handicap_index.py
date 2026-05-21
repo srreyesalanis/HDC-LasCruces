@@ -55,7 +55,7 @@ def calcular_handicap_index(
         .update({
             "current_handicap": handicap_index
         }) \
-        .eq("player_id", player_id) \
+        .eq("id", player_id) \
         .execute()
 
     # =========================
