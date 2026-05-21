@@ -6,8 +6,8 @@ def calcular_differential(
     slope_rating
 ):
     differential = (
-        (adjusted_total - course_rating)
-        * 113
+    (adjusted_total - course_rating)
+    * 113
     ) / slope_rating
 
     supabase.table("rounds") \
