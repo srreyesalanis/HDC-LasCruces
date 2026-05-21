@@ -13,7 +13,7 @@ def calcular_handicap_index(
     # =========================
     response = supabase.table("rounds") \
         .select("differential") \
-        .eq("golfer_id", player_id) \
+        .eq("player_id", player_id) \
         .not_.is_("differential", "null") \
         .order("created_at", desc=True) \
         .limit(20) \
