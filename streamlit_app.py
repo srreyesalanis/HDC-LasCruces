@@ -299,7 +299,7 @@ else:
 
             supabase.table("rounds") \
                 .update({
-                    "differential": differential
+                    "differential": differential,
                     "course_rating_used": course_rating,
                     "slope_rating_used": slope_rating
                 }) \
