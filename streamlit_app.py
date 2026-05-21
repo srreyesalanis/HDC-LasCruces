@@ -177,10 +177,6 @@ else:
         slope_rating = selected_tee["slope"]
         course_rating = selected_tee["rating"]
 
-        st.write(f"Slope Rating: {slope_rating}")
-        st.write(f"Course Rating: {course_rating}")
-
-
         # =========================
         # FECHA DE LA RONDA
         # =========================
