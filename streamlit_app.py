@@ -167,6 +167,18 @@ else:
 
         selected_tee_id = tee_options[selected_tee_name]
 
+        # OBTENER DATOS DE LA TEE SELECCIONADA
+        selected_tee = next(
+            tee for tee in tees
+            if tee["id"] == selected_tee_id
+        )
+
+        slope_rating = selected_tee["slope_rating"]
+        course_rating = selected_tee["course_rating"]
+        st.write(f"Slope Rating: {slope_rating}")
+        st.write(f"Course Rating: {course_rating}")
+
+
         # =========================
         # FECHA DE LA RONDA
         # =========================
