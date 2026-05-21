@@ -63,7 +63,7 @@ def calcular_handicap_index(
     # =========================
     supabase.table("handicaps") \
         .insert({
-            "golfer_id": player_id,
+            "player_id": player_id,
             "handicap_index": handicap_index
         }) \
         .execute()
