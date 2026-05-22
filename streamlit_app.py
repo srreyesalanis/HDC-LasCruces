@@ -115,7 +115,6 @@ else:
                     }).execute()
 
                     st.success("Jugador creado")
-                    st.write(response.data)
 
             except Exception as e:
                     st.error(str(e))
