@@ -87,10 +87,10 @@ else:
         if st.button("🏌️ Crear Ronda", use_container_width=True):
             st.session_state["page"] = "crear_ronda"
 
-    if st.button("✏️ Modificar Ronda", use_container_width=True):
+    if st.button("✏️ Modificar Ronda", use_container_width=True, key="btn_modificar_ronda"):
         st.session_state["page"] = "modificar_ronda"
 
-    if st.button("✏️ Modificar Ronda", use_container_width=True):
+    if st.button("✏️ Modificar Ronda", use_container_width=True, key="btn_modificar_ronda"):
         st.session_state["page"] = "modificar_ronda"
 
     st.markdown("---")
