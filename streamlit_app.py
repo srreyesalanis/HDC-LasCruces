@@ -148,9 +148,12 @@ else:
 
         selected_course_name = st.selectbox(
             "Selecciona el Campo",
-            options=list(course_options.keys())
+            options=list(course_options.keys()),
+            index=None,
+            placeholder="Selecciona un campo..."
         )
-
+        if selected_course_name is None:
+            st.stop()
         selected_course_id = course_options[selected_course_name]
 
         # =========================
@@ -168,9 +171,12 @@ else:
 
         selected_tee_name = st.selectbox(
             "Selecciona las Tees",
-            options=list(tee_options.keys())
+            options=list(tee_options.keys()),
+            index=None,
+            placeholder="Selecciona las tees..."
         )
-
+        if selected_tee_name is None:
+            st.stop()
         selected_tee_id = tee_options[selected_tee_name]
 
         # OBTENER DATOS DE LA TEE SELECCIONADA
