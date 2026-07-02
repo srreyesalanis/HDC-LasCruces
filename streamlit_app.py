@@ -204,8 +204,12 @@ else:
         # Selectbox
         selected_player_name = st.selectbox(
         "Jugador",
-            list(player_options.keys())
-    )
+            list(player_options.keys()),
+            index=None,
+            placeholder="Selecciona un jugador..."
+        )
+        if selected_player_name is None:
+            st.stop()
 
         # Obtener UUID del jugador seleccionado
         player_id = player_options[selected_player_name]
@@ -314,7 +318,9 @@ else:
         players_mod = supabase.table("players").select("*").order("name").execute().data
         player_options_mod = {p["name"]: p["id"] for p in players_mod}
 
-        selected_player_mod = st.selectbox("Jugador", list(player_options_mod.keys()), key="mod_player")
+        selected_player_mod = st.selectbox("Jugador", list(player_options_mod.keys()), index=None, placeholder="Selecciona un jugador...", key="mod_player")
+        if selected_player_mod is None:
+            st.stop()
         player_id_mod = player_options_mod[selected_player_mod]
 
         rounds_data = supabase.table("rounds") \
