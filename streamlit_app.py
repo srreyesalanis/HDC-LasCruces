@@ -352,10 +352,8 @@ else:
             tee_mod = next(t for t in all_tees if t["id"] == selected_tee_id_mod)
 
             # Fecha editable
-            from datetime import date, datetime as _dt_global
-from zoneinfo import ZoneInfo
-_TZ_CST = ZoneInfo("America/Monterrey") as _date, datetime as _datetime
-            current_date = _datetime.strptime(selected_round["played_at"], "%Y-%m-%d").date() if selected_round.get("played_at") else _date.today()
+            from datetime import date as _date, datetime as _datetime
+            current_date = _datetime.strptime(selected_round["played_at"], "%Y-%m-%d").date() if selected_round.get("played_at") else _dt_global.now(_TZ_CST).date()
             new_date = st.date_input("Fecha de la ronda", value=current_date, key="mod_date")
 
             # Scores actuales
