@@ -87,6 +87,9 @@ else:
         if st.button("🏌️ Crear Ronda", use_container_width=True):
             st.session_state["page"] = "crear_ronda"
 
+    if st.button("✏️ Modificar Ronda", use_container_width=True):
+        st.session_state["page"] = "modificar_ronda"
+
     st.markdown("---")
 
     # PAGINA CREAR JUGADOR
@@ -300,3 +303,102 @@ else:
 
 
 
+
+    # PAGINA MODIFICAR RONDA
+    if st.session_state.get("page") == "modificar_ronda":
+
+        st.header("✏️ Modificar Ronda")
+
+        players_mod = supabase.table("players").select("*").order("name").execute().data
+        player_options_mod = {p["name"]: p["id"] for p in players_mod}
+
+        selected_player_mod = st.selectbox("Jugador", list(player_options_mod.keys()), key="mod_player")
+        player_id_mod = player_options_mod[selected_player_mod]
+
+        rounds_data = supabase.table("rounds") \
+            .select("*") \
+            .eq("player_id", player_id_mod) \
+            .order("played_at", desc=True) \
+            .execute().data
+
+        if not rounds_data:
+            st.info("Este jugador no tiene rondas registradas.")
+        else:
+            def round_label(r):
+                diff = r.get("differential", "N/A")
+                return f"{r['played_at']} - Total: {r['total_score']} | Diferencial: {diff}"
+
+            round_options = {round_label(r): r["round_id"] for r in rounds_data}
+
+            selected_round_label = st.selectbox("Ronda a modificar", list(round_options.keys()), key="mod_round")
+            selected_round_id = round_options[selected_round_label]
+            selected_round = next(r for r in rounds_data if r["round_id"] == selected_round_id)
+
+            tee_mod = supabase.table("tees").select("*").eq("id", selected_round["tee_id"]).execute().data[0]
+            course_mod = supabase.table("courses").select("*").eq("id", selected_round["course_id"]).execute().data[0]
+
+            st.caption(f"Campo: {course_mod['name']} | Tee: {tee_mod['color']} | Rating: {tee_mod['rating']} | Slope: {tee_mod['slope']}")
+
+            holes_data = {
+                h["hole_number"]: h["strokes"]
+                for h in supabase.table("round_holes").select("*").eq("round_id", selected_round_id).execute().data
+            }
+
+            front_df_mod = pd.DataFrame({
+                "Hoyo":  list(range(1, 10)),
+                "Score": [holes_data.get(h, 0) for h in range(1, 10)]
+            })
+            back_df_mod = pd.DataFrame({
+                "Hoyo":  list(range(10, 19)),
+                "Score": [holes_data.get(h, 0) for h in range(10, 19)]
+            })
+
+            st.subheader("Front 9")
+            front_mod = st.data_editor(front_df_mod, hide_index=True, use_container_width=True, key="mod_front")
+
+            st.subheader("Back 9")
+            back_mod = st.data_editor(back_df_mod, hide_index=True, use_container_width=True, key="mod_back")
+
+            front_total_mod = front_mod["Score"].sum()
+            back_total_mod  = back_mod["Score"].sum()
+            total_mod       = front_total_mod + back_total_mod
+
+            st.markdown("---")
+            st.write(f"Front: {front_total_mod}")
+            st.write(f"Back: {back_total_mod}")
+            st.write(f"Total: {total_mod}")
+
+            if st.button("Guardar cambios", use_container_width=True):
+
+                supabase.table("rounds").update({
+                    "total_score": int(total_mod)
+                }).eq("round_id", selected_round_id).execute()
+
+                for _, row in pd.concat([front_mod, back_mod]).iterrows():
+                    supabase.table("round_holes") \
+                        .update({"strokes": int(row["Score"])}) \
+                        .eq("round_id", selected_round_id) \
+                        .eq("hole_number", int(row["Hoyo"])) \
+                        .execute()
+
+                adjusted_total_mod = calcular_total_ajustado(
+                    supabase,
+                    selected_round["course_id"],
+                    selected_round_id
+                )
+
+                differential_mod = calcular_differential(
+                    supabase,
+                    adjusted_total_mod,
+                    tee_mod["rating"],
+                    selected_round_id,
+                    tee_mod["slope"]
+                )
+
+                handicap_mod = calcular_handicap_index(
+                    supabase,
+                    player_id_mod
+                )
+
+                hdc_str = str(handicap_mod) if handicap_mod is not None else "Sin datos suficientes"
+                st.success(f"Ronda actualizada. Diferencial: {differential_mod} | Handicap Index: {hdc_str}")
