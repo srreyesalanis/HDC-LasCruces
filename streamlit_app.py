@@ -77,25 +77,10 @@ else:
     )
     st.markdown("---")
 
-    st.subheader("Menú Principal")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("👤 Crear Jugador", use_container_width=True):
-            st.session_state["page"] = "crear_jugador"
-
-    with col2:
-        if st.button("🏌️ Crear Ronda", use_container_width=True):
-            st.session_state["page"] = "crear_ronda"
-
-    if st.button("✏️ Modificar Ronda", use_container_width=True, key="btn_modificar_ronda"):
-        st.session_state["page"] = "modificar_ronda"
-
-    st.markdown("---")
+    tab_jugador, tab_ronda, tab_mod = st.tabs(["👤 Crear Jugador", "🏌️ Crear Ronda", "✏️ Modificar Ronda"])
 
     # PAGINA CREAR JUGADOR
-    if st.session_state.get("page") == "crear_jugador":
+    with tab_jugador:
 
         st.header("👤 Nuevo Jugador")
 
@@ -125,7 +110,7 @@ else:
                     st.error(str(e))
 
     # PAGINA CREAR RONDA
-    if st.session_state.get("page") == "crear_ronda":
+    with tab_ronda:
 
         st.header("🏌️ Nueva Ronda")
 
@@ -317,7 +302,7 @@ else:
 
 
     # PAGINA MODIFICAR RONDA
-    if st.session_state.get("page") == "modificar_ronda":
+    with tab_mod:
 
         st.header("✏️ Modificar Ronda")
 
