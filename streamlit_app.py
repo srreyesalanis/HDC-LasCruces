@@ -275,14 +275,12 @@ else:
                         supabase.table("rounds").delete().eq("round_id", _rid_mod).execute()
                         calcular_handicap_index(supabase, _pid_mod)
                         st.session_state["confirm_delete"] = None
-                        st.success("Ronda eliminada.")
-                        st.rerun()
+                        st.success("Ronda eliminada. Recarga para ver cambios.")
                     except Exception as _e:
                         st.error(f"Error al borrar: {_e}")
             with col_no:
                 if st.button("Cancelar", use_container_width=True, key="mod_btn_no"):
                     st.session_state["confirm_delete"] = None
-                    st.rerun()
 
     with tab_import:
 
