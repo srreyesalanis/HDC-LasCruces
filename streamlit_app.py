@@ -192,6 +192,10 @@ else:
     st.markdown(f"Bienvenido **{_user_email}**")
     st.markdown("---")
 
+    for _k, _v in [("ronda_course", None), ("ronda_tee", None), ("ronda_player", None), ("mod_player", None), ("mod_round", None), ("mod_course", None), ("mod_tee", None), ("imp_torneo", None), ("confirm_delete", None)]:
+        if _k not in st.session_state:
+            st.session_state[_k] = _v
+
     tab_jugador, tab_ronda, tab_mod, tab_import = st.tabs(["Crear Jugador", "Crear Ronda", "Modificar Ronda", "Importar Ronda"])
 
     # PAGINA CREAR JUGADOR
