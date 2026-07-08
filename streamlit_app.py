@@ -16,7 +16,7 @@ key = st.secrets["SUPABASE_KEY"]
 
 supabase = create_client(url, key)
 
-st.title("⛳ Golf Handicap - Las Cruces")
+st.title("Golf Handicap - Las Cruces")
 
 # Session state
 if "user" not in st.session_state:
@@ -57,7 +57,7 @@ else:
     with top_col2:
 
         logout_button = st.button(
-        "Cerrar Sesión",
+        "Cerrar Sesion",
         type="primary",
         use_container_width=True,
         key="logout_button"
@@ -77,12 +77,12 @@ else:
     )
     st.markdown("---")
 
-    tab_jugador, tab_ronda, tab_mod, tab_import = st.tabs(["👤 Crear Jugador", "🏌️ Crear Ronda", "✏️ Modificar Ronda", "📥 Importar Ronda"])
+    tab_jugador, tab_ronda, tab_mod, tab_import = st.tabs(["Crear Jugador", "Crear Ronda", "Modificar Ronda", "Importar Ronda"])
 
     # PAGINA CREAR JUGADOR
     with tab_jugador:
 
-        st.header("👤 Nuevo Jugador")
+        st.header("Nuevo Jugador")
 
         name = st.text_input("Nombre")
         email = st.text_input("Email")
@@ -112,7 +112,7 @@ else:
     # PAGINA CREAR RONDA
     with tab_ronda:
 
-        st.header("🏌️ Nueva Ronda")
+        st.header("Nueva Ronda")
 
         courses = supabase.table("courses").select("*").execute().data
         course_options = {c["name"]: c["id"] for c in courses}
@@ -181,7 +181,7 @@ else:
     # PAGINA MODIFICAR RONDA
     with tab_mod:
 
-        st.header("✏️ Modificar Ronda")
+        st.header("Modificar Ronda")
 
         players_mod = supabase.table("players").select("*").order("name").execute().data
         player_options_mod = {p["name"]: p["id"] for p in players_mod}
@@ -245,7 +245,7 @@ else:
 
                 col_save, col_del = st.columns(2)
                 with col_save:
-                    if st.button("💾 Guardar cambios", use_container_width=True):
+                    if st.button("Guardar cambios", use_container_width=True):
                         supabase.table("rounds").update({
                             "total_score": int(total_mod), "tee_id": selected_tee_id_mod,
                             "course_id": selected_course_id_mod, "played_at": str(new_date)
@@ -258,7 +258,7 @@ else:
                         hdc_str = str(handicap_mod) if handicap_mod is not None else "Sin datos suficientes"
                         st.success(f"Ronda actualizada. Diferencial: {differential_mod} | Handicap Index: {hdc_str}")
                 with col_del:
-                    if st.button("🗑️ Borrar ronda", use_container_width=True, type="primary"):
+                    if st.button("Borrar ronda", use_container_width=True, type="primary"):
                         st.session_state["confirm_delete"] = selected_round_id
 
                 if st.session_state.get("confirm_delete") == selected_round_id:
