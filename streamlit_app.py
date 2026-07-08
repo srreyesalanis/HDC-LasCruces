@@ -320,30 +320,28 @@ else:
             except Exception as _e:
                 st.error(f"Error cargando torneo: {_e}")
 
+        st.markdown("---")
+        st.subheader("Importar jugador")
         if torneo and all_gp:
-            st.markdown("---")
-            st.subheader("Scores hoyo por hoyo")
-            hoyos = list(range(1, 19))
-            tabla_rows = []
-            for gp in all_gp:
-                pid = gp.get("player_id") or gp.get("guest_id")
-                row = {"Jugador": gp["player_name"], "Grupo": gp["group_name"]}
-                total = 0
-                for h in hoyos:
-                    v = scores_idx.get((pid, h))
-                    row[f"H{h}"] = v if v is not None else "-"
-                    if v: total += v
-                row["Total"] = total if total else "-"
-                tabla_rows.append(row)
-            st.dataframe(pd.DataFrame(tabla_rows), use_container_width=True, hide_index=True)
-
-        if torneo and all_gp:
-            st.markdown("---")
-            st.subheader("Importar jugador")
+            try:
+                hoyos = list(range(1, 19))
+                tabla_rows = []
+                for gp in all_gp:
+                    pid = gp.get("player_id") or gp.get("guest_id")
+                    row = {"Jugador": str(gp["player_name"]), "Grupo": str(gp["group_name"])}
+                    total = 0
+                    for h in hoyos:
+                        v = scores_idx.get((pid, h))
+                        row[f"H{h}"] = str(v) if v is not None else "-"
+                        if v: total += v
+                    row["Total"] = str(total) if total else "-"
+                    tabla_rows.append(row)
+                st.dataframe(pd.DataFrame(tabla_rows), use_container_width=True, hide_index=True)
+                st.markdown("---")
+            except Exception as _edf:
+                st.error(f"Error mostrando scores: {_edf}")
         else:
-            st.markdown("---")
-            st.subheader("Importar jugador")
-            st.info("Selecciona un torneo con jugadores para importar.")
+            st.info("Selecciona un torneo para ver jugadores.")
 
         try:
             players_hdc = supabase.table("players").select("id, name").order("name").execute().data or []
