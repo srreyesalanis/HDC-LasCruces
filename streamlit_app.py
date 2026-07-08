@@ -16,121 +16,7 @@ key = st.secrets["SUPABASE_KEY"]
 
 supabase = create_client(url, key)
 
-@st.cache_data(ttl=30)
-def get_courses():
-    try:
-        return supabase.table("courses").select("*").execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=30)
-def get_players():
-    try:
-        return supabase.table("players").select("*").order("name").execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=30)
-def get_tees(course_id):
-    try:
-        return supabase.table("tees").select("*").eq("course_id", course_id).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_rounds(player_id):
-    try:
-        return supabase.table("rounds").select("*").eq("player_id", player_id).order("played_at", desc=True).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_torneos():
-    try:
-        return supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_grupos(torneo_id):
-    try:
-        return supabase.table("groups").select("id, name").eq("tournament_id", torneo_id).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_group_players(group_id):
-    try:
-        return supabase.table("group_players").select("id, player_id, guest_id, player_name").eq("group_id", group_id).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_tournament_scores(torneo_id):
-    try:
-        return supabase.table("tournament_scores").select("player_id, guest_id, hole_number, strokes").eq("tournament_id", torneo_id).execute().data or []
-    except Exception:
-        return []
-
-
-@st.cache_data(ttl=30)
-def get_courses():
-    try:
-        return supabase.table("courses").select("*").execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=30)
-def get_players():
-    try:
-        return supabase.table("players").select("*").order("name").execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=30)
-def get_tees(course_id):
-    try:
-        return supabase.table("tees").select("*").eq("course_id", course_id).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_rounds(player_id):
-    try:
-        return supabase.table("rounds").select("*").eq("player_id", player_id).order("played_at", desc=True).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_torneos():
-    try:
-        return supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_grupos(torneo_id):
-    try:
-        return supabase.table("groups").select("id, name").eq("tournament_id", torneo_id).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_group_players(group_id):
-    try:
-        return supabase.table("group_players").select("id, player_id, guest_id, player_name").eq("group_id", group_id).execute().data or []
-    except Exception:
-        return []
-
-@st.cache_data(ttl=60)
-def get_tournament_scores(torneo_id):
-    try:
-        return supabase.table("tournament_scores").select("player_id, guest_id, hole_number, strokes").eq("tournament_id", torneo_id).execute().data or []
-    except Exception:
-        return []
-
-
-st.title("⛳ Golf Handicap - Las Cruces")
+st.title("Golf Handicap - Las Cruces")
 
 # Session state
 if "user" not in st.session_state:
@@ -147,20 +33,31 @@ if st.session_state.user is None:
     if st.button("Entrar"):
 
         try:
+            import io, sys, traceback
+            _old_stdout = sys.stdout
+            _old_stderr = sys.stderr
+            sys.stdout = io.TextIOWrapper(io.BytesIO(), encoding='utf-8')
+            sys.stderr = io.TextIOWrapper(io.BytesIO(), encoding='utf-8')
+            try:
+                response = supabase.auth.sign_in_with_password({
+                    "email": email,
+                    "password": password
+                })
+            finally:
+                sys.stdout = _old_stdout
+                sys.stderr = _old_stderr
 
-            response = supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
-
-            st.session_state.user = response.user
-
-            st.success("Login correcto")
-
-            st.rerun()
+            if response and response.user:
+                st.session_state.user = response.user
+                st.success("Login correcto")
+                st.rerun()
+            else:
+                st.error("Login fallido: respuesta invalida.")
 
         except Exception as e:
-            st.error(str(e))
+            _tb = traceback.format_exc()
+            _tb_safe = _tb.encode('ascii', 'replace').decode('ascii')
+            st.error("Traceback: " + _tb_safe[-500:])
 
 # APP
 else:
@@ -185,16 +82,11 @@ else:
 
             st.rerun()
 
-    try:
-        _user_email = st.session_state.user.email
-    except Exception:
-        _user_email = "usuario"
-    st.markdown(f"Bienvenido **{_user_email}**")
+    st.success(
+        f"Bienvenido {st.session_state.user.email}"
+        
+    )
     st.markdown("---")
-
-    for _k, _v in [("ronda_course", None), ("ronda_tee", None), ("ronda_player", None), ("mod_player", None), ("mod_round", None), ("mod_course", None), ("mod_tee", None), ("imp_torneo", None), ("confirm_delete", None)]:
-        if _k not in st.session_state:
-            st.session_state[_k] = _v
 
     tab_jugador, tab_ronda, tab_mod, tab_import = st.tabs(["Crear Jugador", "Crear Ronda", "Modificar Ronda", "Importar Ronda"])
 
@@ -203,300 +95,352 @@ else:
 
         st.header("Nuevo Jugador")
 
-        name      = st.text_input("Nombre", key="jug_nombre")
-        email_jug = st.text_input("Email",  key="jug_email")
+        name = st.text_input("Nombre")
+        email = st.text_input("Email")
 
-        if st.button("Guardar Jugador", key="btn_guardar_jug"):
+        if st.button("Guardar Jugador"):
             try:
-                supabase.table("players").insert({"name": name, "email": email_jug}).execute()
+                supabase.table("players").insert({"name": name, "email": email}).execute()
                 st.success("Jugador creado")
             except Exception:
                 st.error("Error al guardar jugador.")
 
+
+    # PAGINA CREAR RONDA
     with tab_ronda:
 
         st.header("Nueva Ronda")
 
-        course_options = {c["name"]: c["id"] for c in get_courses()}
+        courses = supabase.table("courses").select("*").execute().data
+        course_options = {c["name"]: c["id"] for c in courses}
 
-        st.selectbox("Campo", list(course_options.keys()), index=None, placeholder="Selecciona un campo...", key="ronda_course")
+        selected_course_name = st.selectbox("Selecciona el Campo", list(course_options.keys()), index=None, placeholder="Selecciona un campo...")
 
-        tee_options = {}
-        if st.session_state.get("ronda_course") and course_options:
-            _cid = course_options.get(st.session_state["ronda_course"])
-            if _cid:
-                tee_options = {t["color"]: t for t in get_tees(_cid)}
+        if selected_course_name:
+            selected_course_id = course_options[selected_course_name]
 
-        _tk = list(tee_options.keys()) if tee_options else [""]
-        st.selectbox("Tees", _tk, index=None if tee_options else 0, placeholder="Tees...", key="ronda_tee")
+            tees = supabase.table("tees").select("*").eq("course_id", selected_course_id).execute().data
+            tee_options = {t["color"]: t["id"] for t in tees}
 
-        player_options = {p["name"]: p["id"] for p in get_players()}
+            selected_tee_name = st.selectbox("Selecciona las Tees", list(tee_options.keys()), index=None, placeholder="Selecciona las tees...")
 
-        st.selectbox("Jugador", list(player_options.keys()), index=None, placeholder="Selecciona un jugador...", key="ronda_player")
-        round_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="ronda_date")
+            if selected_tee_name:
+                selected_tee_id = tee_options[selected_tee_name]
+                selected_tee = next(t for t in tees if t["id"] == selected_tee_id)
+                slope_rating = selected_tee["slope"]
+                course_rating = selected_tee["rating"]
 
-        st.subheader("Front 9")
-        front_scores = st.data_editor(pd.DataFrame({"Hoyo": list(range(1,10)),  "Score": [0]*9}), hide_index=True, use_container_width=True, key="ronda_front")
-        st.subheader("Back 9")
-        back_scores  = st.data_editor(pd.DataFrame({"Hoyo": list(range(10,19)), "Score": [0]*9}), hide_index=True, use_container_width=True, key="ronda_back")
+                round_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date())
 
-        front_total = front_scores["Score"].sum()
-        back_total  = back_scores["Score"].sum()
-        total = front_total + back_total
-        st.write(f"Front: {front_total} | Back: {back_total} | Total: {total}")
+                players_response = supabase.table("players").select("*").order("name").execute().data
+                player_options = {p["name"]: p["id"] for p in players_response}
 
-        if st.button("Guardar Ronda", key="btn_guardar_ronda", use_container_width=True, type="primary"):
-            _pn = st.session_state.get("ronda_player")
-            _cn = st.session_state.get("ronda_course")
-            _tn = st.session_state.get("ronda_tee")
-            if not _pn or not _cn or not _tn:
-                st.error("Selecciona campo, tees y jugador.")
-            else:
-                try:
-                    _tee = tee_options.get(_tn)
-                    if not _tee:
-                        st.error("Tee no encontrado.")
-                    else:
-                        _pid  = player_options[_pn]
-                        _cid2 = course_options[_cn]
-                        _rid  = str(uuid.uuid4())
-                        supabase.table("rounds").insert({"round_id": _rid, "player_id": _pid, "course_id": _cid2, "tee_id": _tee["id"], "played_at": str(round_date), "total_score": int(total)}).execute()
+                selected_player_name = st.selectbox("Jugador", list(player_options.keys()), index=None, placeholder="Selecciona un jugador...")
+
+                if selected_player_name:
+                    player_id = player_options[selected_player_name]
+
+                    front_df = pd.DataFrame({"Hoyo": list(range(1,10)),  "Score": [0]*9})
+                    back_df  = pd.DataFrame({"Hoyo": list(range(10,19)), "Score": [0]*9})
+
+                    st.subheader("Front 9")
+                    front_scores = st.data_editor(front_df, hide_index=True, use_container_width=True)
+                    st.subheader("Back 9")
+                    back_scores  = st.data_editor(back_df,  hide_index=True, use_container_width=True)
+
+                    front_total = front_scores["Score"].sum()
+                    back_total  = back_scores["Score"].sum()
+                    total = front_total + back_total
+
+                    st.markdown("---")
+                    st.write(f"Front: {front_total} | Back: {back_total} | Total: {total}")
+
+                    if st.button("Guardar Ronda"):
+                        round_id = str(uuid.uuid4())
+                        supabase.table("rounds").insert({
+                            "round_id": round_id, "player_id": player_id,
+                            "course_id": selected_course_id, "tee_id": selected_tee_id,
+                            "played_at": str(round_date), "total_score": int(total),
+                        }).execute()
                         for _, row in pd.concat([front_scores, back_scores]).iterrows():
-                            supabase.table("round_holes").insert({"round_id": _rid, "hole_number": int(row["Hoyo"]), "strokes": int(row["Score"])}).execute()
-                        _adj  = calcular_total_ajustado(supabase, _cid2, _rid)
-                        _diff = calcular_differential(supabase, _adj, _tee["rating"], _rid, _tee["slope"])
-                        _hdc  = calcular_handicap_index(supabase, _pid)
+                            supabase.table("round_holes").insert({
+                                "round_id": round_id, "hole_number": int(row["Hoyo"]), "strokes": int(row["Score"])
+                            }).execute()
+                        adjusted_total = calcular_total_ajustado(supabase, selected_course_id, round_id)
+                        differential   = calcular_differential(supabase, adjusted_total, course_rating, round_id, slope_rating)
+                        handicap_index = calcular_handicap_index(supabase, player_id)
                         st.success("Ronda guardada")
-                except Exception:
-                    st.error("Error al guardar ronda.")
 
+
+
+
+
+    # PAGINA MODIFICAR RONDA
     with tab_mod:
 
         st.header("Modificar Ronda")
 
-        popts_mod = {p["name"]: p["id"] for p in get_players()}
+        players_mod = supabase.table("players").select("*").order("name").execute().data
+        player_options_mod = {p["name"]: p["id"] for p in players_mod}
 
-        st.selectbox("Jugador", list(popts_mod.keys()), index=None, placeholder="Selecciona un jugador...", key="mod_player")
+        selected_player_mod = st.selectbox("Jugador", list(player_options_mod.keys()), index=None, placeholder="Selecciona un jugador...", key="mod_player")
+        if selected_player_mod:
+            player_id_mod = player_options_mod[selected_player_mod]
 
-        _pid_mod = popts_mod.get(st.session_state.get("mod_player", ""))
-        rounds_data = get_rounds(_pid_mod) if _pid_mod else []
+            rounds_data = supabase.table("rounds") \
+                .select("*") \
+                .eq("player_id", player_id_mod) \
+                .order("played_at", desc=True) \
+                .execute().data
 
-        def _rlabel(r):
-            diff = r.get("differential", "N/A")
-            return f"{r['played_at']} - Total: {r['total_score']} | Dif: {diff}"
+            if not rounds_data:
+                st.info("Este jugador no tiene rondas registradas.")
+            else:
+                def round_label(r):
+                    diff = r.get("differential", "N/A")
+                    return f"{r['played_at']} - Total: {r['total_score']} | Diferencial: {diff}"
 
-        round_opts_mod = {_rlabel(r): r["round_id"] for r in rounds_data} if rounds_data else {}
-        _round_keys = list(round_opts_mod.keys()) if round_opts_mod else []
-        st.selectbox("Ronda", _round_keys, index=None, placeholder="Selecciona una ronda...", key="mod_round")
+                round_options = {round_label(r): r["round_id"] for r in rounds_data}
 
-        _rid_mod = round_opts_mod.get(st.session_state.get("mod_round", ""))
-        _sel_round = next((r for r in rounds_data if r.get("round_id") == _rid_mod), None) if _rid_mod else None
+                selected_round_label = st.selectbox("Ronda a modificar", list(round_options.keys()), key="mod_round")
+                selected_round_id = round_options[selected_round_label]
+                selected_round = next(r for r in rounds_data if r["round_id"] == selected_round_id)
 
-        copts_mod = {c["name"]: c["id"] for c in get_courses()}
-        _cur_course = next((c["name"] for c in get_courses() if _sel_round and c["id"] == _sel_round.get("course_id")), None)
-        _cidx_mod = list(copts_mod.keys()).index(_cur_course) if _cur_course and _cur_course in copts_mod else None
-        st.selectbox("Campo", list(copts_mod.keys()), index=_cidx_mod, placeholder="Campo...", key="mod_course")
+                all_courses = supabase.table("courses").select("*").execute().data
+                course_options_mod = {c["name"]: c["id"] for c in all_courses}
+                current_course = next((c["name"] for c in all_courses if c["id"] == selected_round["course_id"]), list(course_options_mod.keys())[0])
+                selected_course_mod = st.selectbox("Campo", list(course_options_mod.keys()), index=list(course_options_mod.keys()).index(current_course), key="mod_course")
+                selected_course_id_mod = course_options_mod[selected_course_mod]
 
-        _cid_mod = copts_mod.get(st.session_state.get("mod_course", ""))
-        tee_list_mod = get_tees(_cid_mod) if _cid_mod else []
-        topts_mod = {t["color"]: t for t in tee_list_mod}
-        _cur_tee = next((t["color"] for t in tee_list_mod if _sel_round and t["id"] == _sel_round.get("tee_id")), None)
-        _tidx_mod = list(topts_mod.keys()).index(_cur_tee) if _cur_tee and _cur_tee in topts_mod else None
-        st.selectbox("Tees", list(topts_mod.keys()), index=_tidx_mod, placeholder="Tees...", key="mod_tee")
+                all_tees = supabase.table("tees").select("*").eq("course_id", selected_course_id_mod).execute().data
+                tee_options_mod = {t["color"]: t["id"] for t in all_tees}
+                current_tee = next((t["color"] for t in all_tees if t["id"] == selected_round["tee_id"]), list(tee_options_mod.keys())[0])
+                tee_default_idx = list(tee_options_mod.keys()).index(current_tee) if current_tee in tee_options_mod else 0
+                selected_tee_mod = st.selectbox("Tees", list(tee_options_mod.keys()), index=tee_default_idx, key="mod_tee")
+                selected_tee_id_mod = tee_options_mod[selected_tee_mod]
+                tee_mod = next(t for t in all_tees if t["id"] == selected_tee_id_mod)
 
-        from datetime import datetime as _dtmod
-        _cur_date_mod = _dtmod.strptime(_sel_round["played_at"], "%Y-%m-%d").date() if _sel_round and _sel_round.get("played_at") else _dt_global.now(_TZ_CST).date()
-        st.date_input("Fecha", value=_cur_date_mod, key="mod_date")
+                from datetime import date as _date, datetime as _datetime
+                current_date = _datetime.strptime(selected_round["played_at"], "%Y-%m-%d").date() if selected_round.get("played_at") else _dt_global.now(_TZ_CST).date()
+                new_date = st.date_input("Fecha de la ronda", value=current_date, key="mod_date")
 
-        _holes_mod = {}
-        if _rid_mod:
-            try:
-                _hd = supabase.table("round_holes").select("*").eq("round_id", _rid_mod).execute().data or []
-                _holes_mod = {h["hole_number"]: h["strokes"] for h in _hd}
-            except Exception:
-                _holes_mod = {}
+                holes_data = {h["hole_number"]: h["strokes"] for h in supabase.table("round_holes").select("*").eq("round_id", selected_round_id).execute().data}
+                front_df_mod = pd.DataFrame({"Hoyo": list(range(1, 10)),  "Score": [holes_data.get(h, 0) for h in range(1, 10)]})
+                back_df_mod  = pd.DataFrame({"Hoyo": list(range(10, 19)), "Score": [holes_data.get(h, 0) for h in range(10, 19)]})
 
-        _fdf = pd.DataFrame({"Hoyo": list(range(1, 10)),  "Score": [_holes_mod.get(h, 0) for h in range(1, 10)]})
-        _bdf = pd.DataFrame({"Hoyo": list(range(10, 19)), "Score": [_holes_mod.get(h, 0) for h in range(10, 19)]})
+                st.subheader("Front 9")
+                front_mod = st.data_editor(front_df_mod, hide_index=True, use_container_width=True, key="mod_front")
+                st.subheader("Back 9")
+                back_mod  = st.data_editor(back_df_mod,  hide_index=True, use_container_width=True, key="mod_back")
 
-        st.subheader("Front 9")
-        front_mod = st.data_editor(_fdf, hide_index=True, use_container_width=True, key="mod_front")
-        st.subheader("Back 9")
-        back_mod  = st.data_editor(_bdf, hide_index=True, use_container_width=True, key="mod_back")
+                front_total_mod = front_mod["Score"].sum()
+                back_total_mod  = back_mod["Score"].sum()
+                total_mod       = front_total_mod + back_total_mod
 
-        ft_mod = front_mod["Score"].sum()
-        bt_mod = back_mod["Score"].sum()
-        tt_mod = ft_mod + bt_mod
-        st.write(f"Front: {ft_mod} | Back: {bt_mod} | Total: {tt_mod}")
-        st.markdown("---")
+                st.markdown("---")
+                st.write(f"Front: {front_total_mod} | Back: {back_total_mod} | Total: {total_mod}")
 
-        col_save, col_del = st.columns(2)
-        with col_save:
-            if st.button("Guardar cambios", use_container_width=True, key="mod_btn_save"):
-                if not _rid_mod or not _pid_mod:
-                    st.error("Selecciona jugador y ronda.")
-                else:
-                    try:
-                        _tid_mod = topts_mod.get(st.session_state.get("mod_tee", ""), {}).get("id")
-                        supabase.table("rounds").update({"total_score": int(tt_mod), "tee_id": _tid_mod, "course_id": _cid_mod, "played_at": str(st.session_state["mod_date"])}).eq("round_id", _rid_mod).execute()
+                col_save, col_del = st.columns(2)
+                with col_save:
+                    if st.button("Guardar cambios", use_container_width=True):
+                        supabase.table("rounds").update({
+                            "total_score": int(total_mod), "tee_id": selected_tee_id_mod,
+                            "course_id": selected_course_id_mod, "played_at": str(new_date)
+                        }).eq("round_id", selected_round_id).execute()
                         for _, row in pd.concat([front_mod, back_mod]).iterrows():
-                            supabase.table("round_holes").update({"strokes": int(row["Score"])}).eq("round_id", _rid_mod).eq("hole_number", int(row["Hoyo"])).execute()
-                        _adj_mod = calcular_total_ajustado(supabase, _cid_mod, _rid_mod)
-                        _tee_mod = topts_mod.get(st.session_state.get("mod_tee", ""), {})
-                        _diff_mod = calcular_differential(supabase, _adj_mod, _tee_mod.get("rating"), _rid_mod, _tee_mod.get("slope"))
-                        _hdc_mod = calcular_handicap_index(supabase, _pid_mod)
-                        st.success(f"Ronda actualizada. Dif: {_diff_mod} | HDC: {_hdc_mod}")
-                    except Exception as _e:
-                        st.error(f"Error al guardar: {_e}")
-        with col_del:
-            if st.button("Borrar ronda", use_container_width=True, type="primary", key="mod_btn_del"):
-                if _rid_mod:
-                    st.session_state["confirm_delete"] = _rid_mod
+                            supabase.table("round_holes").update({"strokes": int(row["Score"])}).eq("round_id", selected_round_id).eq("hole_number", int(row["Hoyo"])).execute()
+                        adjusted_total_mod = calcular_total_ajustado(supabase, selected_course_id_mod, selected_round_id)
+                        differential_mod   = calcular_differential(supabase, adjusted_total_mod, tee_mod["rating"], selected_round_id, tee_mod["slope"])
+                        handicap_mod       = calcular_handicap_index(supabase, player_id_mod)
+                        hdc_str = str(handicap_mod) if handicap_mod is not None else "Sin datos suficientes"
+                        st.success(f"Ronda actualizada. Diferencial: {differential_mod} | Handicap Index: {hdc_str}")
+                with col_del:
+                    if st.button("Borrar ronda", use_container_width=True, type="primary"):
+                        st.session_state["confirm_delete"] = selected_round_id
 
-        if _rid_mod and st.session_state.get("confirm_delete") == _rid_mod:
-            st.warning("Seguro que quieres borrar esta ronda? Esta accion no se puede deshacer.")
-            col_yes, col_no = st.columns(2)
-            with col_yes:
-                if st.button("Si, borrar", use_container_width=True, key="mod_btn_yes"):
-                    try:
-                        supabase.table("round_holes").delete().eq("round_id", _rid_mod).execute()
-                        supabase.table("rounds").delete().eq("round_id", _rid_mod).execute()
-                        calcular_handicap_index(supabase, _pid_mod)
-                        st.session_state["confirm_delete"] = None
-                        st.success("Ronda eliminada. Recarga para ver cambios.")
-                    except Exception as _e:
-                        st.error(f"Error al borrar: {_e}")
-            with col_no:
-                if st.button("Cancelar", use_container_width=True, key="mod_btn_no"):
-                    st.session_state["confirm_delete"] = None
+                if st.session_state.get("confirm_delete") == selected_round_id:
+                    st.warning("Seguro que quieres borrar esta ronda? Esta accion no se puede deshacer.")
+                    col_yes, col_no = st.columns(2)
+                    with col_yes:
+                        if st.button("Si, borrar", use_container_width=True):
+                            supabase.table("round_holes").delete().eq("round_id", selected_round_id).execute()
+                            supabase.table("rounds").delete().eq("round_id", selected_round_id).execute()
+                            calcular_handicap_index(supabase, player_id_mod)
+                            st.session_state["confirm_delete"] = None
+                            st.success("Ronda eliminada y handicap recalculado.")
+                            st.rerun()
+                    with col_no:
+                        if st.button("Cancelar", use_container_width=True):
+                            st.session_state["confirm_delete"] = None
+                            st.rerun()
 
+    # PAGINA IMPORTAR RONDA
     with tab_import:
-
         st.header("Importar Ronda desde Torneo")
 
-        all_torneos = get_torneos()
-
+        # Cargar torneos
         try:
-            torneo_labels = {f"{t.get('date','?')} - {t.get('name','?')} ({t.get('format','?')})" : t for t in all_torneos}
-        except Exception:
-            torneo_labels = {}
-        _torneo_keys = list(torneo_labels.keys()) if torneo_labels else []
-        if not _torneo_keys:
+            all_torneos = supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).limit(50).execute().data or []
+        except Exception as _et:
+            st.error(f"Error cargando torneos: {_et}")
+            all_torneos = []
+
+        if not all_torneos:
             st.info("No hay torneos disponibles.")
-        st.selectbox("Selecciona un torneo", _torneo_keys, index=None, placeholder="Selecciona un torneo...", key="imp_torneo", disabled=not _torneo_keys)
+        else:
+            torneo_labels = {
+                f"{t['date']} - {t['name']} ({t.get('format','?')})": t
+                for t in all_torneos
+            }
+            selected_torneo_label = st.selectbox(
+                "Selecciona un torneo",
+                list(torneo_labels.keys()),
+                index=None,
+                placeholder="Selecciona un torneo...",
+                key="imp_torneo"
+            )
 
-        _tlabel = st.session_state.get("imp_torneo")
-        torneo = torneo_labels.get(_tlabel) if _tlabel and torneo_labels else None
+            if selected_torneo_label:
+                torneo = torneo_labels[selected_torneo_label]
+                torneo_id = torneo["id"]
 
-        all_gp = []
-        scores_idx = {}
-        if torneo:
-            try:
-                groups_imp = get_grupos(torneo["id"])
+                # Cargar grupos y jugadores del torneo
+                groups_imp = supabase.table("groups").select("id, name").eq("tournament_id", torneo_id).execute().data
+                all_gp = []
                 for grp in groups_imp:
-                    gps = get_group_players(grp["id"])
+                    gps = supabase.table("group_players").select("id, player_id, guest_id, player_name, course_handicap").eq("group_id", grp["id"]).execute().data
                     for gp in gps:
                         gp["group_name"] = grp["name"]
                         all_gp.append(gp)
-                scores_raw = get_tournament_scores(torneo["id"])
-                for s in scores_raw:
-                    pid = s.get("player_id") or s.get("guest_id")
-                    scores_idx[(pid, int(s["hole_number"]))] = s["strokes"]
-            except Exception as _e:
-                st.error(f"Error cargando torneo: {_e}")
 
-        st.markdown("---")
-        st.subheader("Importar jugador")
-        if torneo and all_gp:
-            try:
-                hoyos = list(range(1, 19))
-                tabla_rows = []
-                for gp in all_gp:
-                    pid = gp.get("player_id") or gp.get("guest_id")
-                    row = {"Jugador": str(gp["player_name"]), "Grupo": str(gp["group_name"])}
-                    total = 0
-                    for h in hoyos:
-                        v = scores_idx.get((pid, h))
-                        row[f"H{h}"] = str(v) if v is not None else "-"
-                        if v: total += v
-                    row["Total"] = str(total) if total else "-"
-                    tabla_rows.append(row)
-                st.dataframe(pd.DataFrame(tabla_rows), use_container_width=True, hide_index=True)
-                st.markdown("---")
-            except Exception as _edf:
-                st.error(f"Error mostrando scores: {_edf}")
-        else:
-            st.info("Selecciona un torneo para ver jugadores.")
+                if not all_gp:
+                    st.warning("Este torneo no tiene jugadores registrados.")
+                else:
+                    # Cargar scores del torneo
+                    scores_imp = supabase.table("tournament_scores").select("player_id, guest_id, hole_number, strokes, group_id").eq("tournament_id", torneo_id).execute().data
 
-        try:
-            players_hdc = supabase.table("players").select("id, name").order("name").execute().data or []
-        except Exception:
-            players_hdc = []
-        phdc_opts = {p["name"]: p["id"] for p in players_hdc}
+                    # Indice: (player_id o guest_id, hole_number) -> strokes
+                    scores_idx = {}
+                    for s in scores_imp:
+                        pid = s.get("player_id") or s.get("guest_id")
+                        scores_idx[(pid, s["hole_number"])] = s["strokes"]
 
-        try:
-            courses_imp = supabase.table("courses").select("id, name").execute().data or []
-        except Exception:
-            courses_imp = []
-        cimp_opts = {c["name"]: c["id"] for c in courses_imp}
+                    st.markdown("---")
+                    st.subheader("Scores hoyo por hoyo")
 
-        gp_opts = {f"{gp['player_name']} (Grupo: {gp['group_name']})": gp for gp in all_gp} if all_gp else {}
-        _gp_keys = list(gp_opts.keys()) if gp_opts else [""]
-        st.selectbox("Jugador del torneo a importar", _gp_keys, index=None if gp_opts else 0, placeholder="Selecciona un jugador...", key="imp_gp")
-        st.selectbox("Jugador en HDC Las Cruces", list(phdc_opts.keys()), index=None, placeholder="Selecciona jugador HDC...", key="imp_hdc_player")
-        st.selectbox("Campo", list(cimp_opts.keys()), index=None, placeholder="Selecciona campo...", key="imp_course")
+                    # Tabla resumen
+                    hoyos = list(range(1, 19))
+                    tabla_rows = []
+                    for gp in all_gp:
+                        pid = gp.get("player_id") or gp.get("guest_id")
+                        row = {"Jugador": gp["player_name"], "Grupo": gp["group_name"], "HDC": gp.get("course_handicap", "-")}
+                        total = 0
+                        for h in hoyos:
+                            v = scores_idx.get((pid, h))
+                            row[f"H{h}"] = v if v is not None else "-"
+                            if v: total += v
+                        row["Total"] = total if total else "-"
+                        tabla_rows.append(row)
 
-        _cname_imp = st.session_state.get("imp_course")
-        _cid_imp = cimp_opts.get(_cname_imp) if _cname_imp else None
-        tee_imp_opts = {}
-        if _cid_imp:
-            try:
-                tees_imp = supabase.table("tees").select("id, color, rating, slope").eq("course_id", _cid_imp).execute().data or []
-                tee_imp_opts = {t["color"]: t for t in tees_imp}
-            except Exception:
-                tee_imp_opts = {}
+                    df_imp = pd.DataFrame(tabla_rows)
+                    st.dataframe(df_imp, use_container_width=True, hide_index=True)
 
-        _timp_keys = list(tee_imp_opts.keys()) if tee_imp_opts else [""]
-        st.selectbox("Tees", _timp_keys, index=None if tee_imp_opts else 0, placeholder="Tees...", key="imp_tee")
-        st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="imp_date")
+                    st.markdown("---")
+                    st.subheader("Importar jugador")
 
-        _gp_label = st.session_state.get("imp_gp")
-        _gp_sel = gp_opts.get(_gp_label) if _gp_label else None
-        _pid_sel = (_gp_sel.get("player_id") or _gp_sel.get("guest_id")) if _gp_sel else None
+                    # Cargar jugadores registrados en HDC
+                    players_hdc = supabase.table("players").select("id, name").order("name").execute().data
+                    player_hdc_opts = {p["name"]: p["id"] for p in players_hdc}
 
-        _fimp = pd.DataFrame({"Hoyo": list(range(1, 10)),  "Score": [scores_idx.get((_pid_sel, h), 0) for h in range(1, 10)]})
-        _bimp = pd.DataFrame({"Hoyo": list(range(10, 19)), "Score": [scores_idx.get((_pid_sel, h), 0) for h in range(10, 19)]})
+                    # Cargar cursos y tees
+                    courses_imp = supabase.table("courses").select("id, name").execute().data
+                    course_imp_opts = {c["name"]: c["id"] for c in courses_imp}
 
-        st.subheader("Front 9")
-        fimp_ed = st.data_editor(_fimp, hide_index=True, use_container_width=True, key="imp_front")
-        st.subheader("Back 9")
-        bimp_ed = st.data_editor(_bimp, hide_index=True, use_container_width=True, key="imp_back")
+                    # Seleccionar jugador del torneo a importar
+                    gp_opts = {f"{gp['player_name']} (Grupo: {gp['group_name']})": gp for gp in all_gp}
+                    selected_gp_label = st.selectbox(
+                        "Jugador del torneo a importar",
+                        list(gp_opts.keys()),
+                        index=None,
+                        placeholder="Selecciona un jugador...",
+                        key="imp_gp"
+                    )
 
-        ft_imp = fimp_ed["Score"].sum()
-        bt_imp = bimp_ed["Score"].sum()
-        tt_imp = ft_imp + bt_imp
-        st.write(f"Front: {ft_imp} | Back: {bt_imp} | Total: {tt_imp}")
+                    if selected_gp_label:
+                        gp_sel = gp_opts[selected_gp_label]
+                        pid_sel = gp_sel.get("player_id") or gp_sel.get("guest_id")
 
-        if st.button("Importar ronda", use_container_width=True, key="btn_importar", type="primary"):
-            _phdc_sel = st.session_state.get("imp_hdc_player")
-            _tname_imp = st.session_state.get("imp_tee")
-            if not _phdc_sel:
-                st.error("Selecciona el jugador HDC.")
-            elif not _cid_imp or not _tname_imp or not _tname_imp in tee_imp_opts:
-                st.error("Selecciona campo y tees.")
-            else:
-                try:
-                    _tee_imp = tee_imp_opts[_tname_imp]
-                    _phdc_id = phdc_opts[_phdc_sel]
-                    _rid_imp = str(uuid.uuid4())
-                    supabase.table("rounds").insert({"round_id": _rid_imp, "player_id": _phdc_id, "course_id": _cid_imp, "tee_id": _tee_imp["id"], "played_at": str(st.session_state["imp_date"]), "total_score": int(tt_imp)}).execute()
-                    for _, row in pd.concat([fimp_ed, bimp_ed]).iterrows():
-                        supabase.table("round_holes").insert({"round_id": _rid_imp, "hole_number": int(row["Hoyo"]), "strokes": int(row["Score"])}).execute()
-                    _adj_imp = calcular_total_ajustado(supabase, _cid_imp, _rid_imp)
-                    _diff_imp = calcular_differential(supabase, _adj_imp, _tee_imp["rating"], _rid_imp, _tee_imp["slope"])
-                    _hdc_imp = calcular_handicap_index(supabase, _phdc_id)
-                    _hs = str(_hdc_imp) if _hdc_imp is not None else "Sin datos"
-                    st.success(f"Ronda importada. Dif: {_diff_imp} | HDC: {_hs}")
-                except Exception as _e:
-                    st.error(f"Error al importar: {_e}")
+                        # Mapear a jugador HDC
+                        player_hdc_sel = st.selectbox(
+                            "Jugador en HDC Las Cruces",
+                            list(player_hdc_opts.keys()),
+                            index=None,
+                            placeholder="Selecciona jugador HDC...",
+                            key="imp_hdc_player"
+                        )
+
+                        # Campo y tee
+                        course_sel_name = st.selectbox("Campo", list(course_imp_opts.keys()), index=None, placeholder="Campo...", key="imp_course")
+                        if course_sel_name:
+                            course_sel_id = course_imp_opts[course_sel_name]
+                            tees_sel = supabase.table("tees").select("id, color, rating, slope").eq("course_id", course_sel_id).execute().data
+                            tee_imp_opts = {t["color"]: t for t in tees_sel}
+                            tee_sel_name = st.selectbox("Tees", list(tee_imp_opts.keys()), index=None, placeholder="Tees...", key="imp_tee")
+                        else:
+                            course_sel_id = None; tee_imp_opts = {}; tee_sel_name = None
+
+                        # Fecha
+                        imp_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="imp_date")
+
+                        # Scores editables del jugador seleccionado
+                        front_imp = pd.DataFrame({
+                            "Hoyo": list(range(1, 10)),
+                            "Score": [scores_idx.get((pid_sel, h)) or 0 for h in range(1, 10)]
+                        })
+                        back_imp = pd.DataFrame({
+                            "Hoyo": list(range(10, 19)),
+                            "Score": [scores_idx.get((pid_sel, h)) or 0 for h in range(10, 19)]
+                        })
+
+                        st.subheader("Front 9")
+                        front_imp_ed = st.data_editor(front_imp, hide_index=True, use_container_width=True, key="imp_front")
+                        st.subheader("Back 9")
+                        back_imp_ed  = st.data_editor(back_imp,  hide_index=True, use_container_width=True, key="imp_back")
+
+                        front_t = front_imp_ed["Score"].sum()
+                        back_t  = back_imp_ed["Score"].sum()
+                        total_t = front_t + back_t
+                        st.write(f"Front: {front_t} | Back: {back_t} | Total: {total_t}")
+
+                        if st.button("Importar ronda", use_container_width=True, key="btn_importar", type="primary"):
+                            if not player_hdc_sel:
+                                st.error("Selecciona el jugador HDC.")
+                            elif not course_sel_id or not tee_sel_name:
+                                st.error("Selecciona campo y tees.")
+                            else:
+                                tee_imp = tee_imp_opts[tee_sel_name]
+                                player_hdc_id = player_hdc_opts[player_hdc_sel]
+                                round_id_imp = str(uuid.uuid4())
+
+                                supabase.table("rounds").insert({
+                                    "round_id": round_id_imp,
+                                    "player_id": player_hdc_id,
+                                    "course_id": course_sel_id,
+                                    "tee_id": tee_imp["id"],
+                                    "played_at": str(imp_date),
+                                    "total_score": int(total_t),
+                                }).execute()
+
+                                for _, row in pd.concat([front_imp_ed, back_imp_ed]).iterrows():
+                                    supabase.table("round_holes").insert({
+                                        "round_id": round_id_imp,
+                                        "hole_number": int(row["Hoyo"]),
+                                        "strokes": int(row["Score"])
+                                    }).execute()
+
+                                adjusted = calcular_total_ajustado(supabase, course_sel_id, round_id_imp)
+                                differential = calcular_differential(supabase, adjusted, tee_imp["rating"], round_id_imp, tee_imp["slope"])
+                                handicap_index = calcular_handicap_index(supabase, player_hdc_id)
+                                hdc_str = str(handicap_index) if handicap_index is not None else "Sin datos suficientes"
+                                st.success(f"Ronda importada. Diferencial: {differential} | Handicap Index: {hdc_str}")
 
