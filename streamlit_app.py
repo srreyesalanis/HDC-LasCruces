@@ -307,7 +307,7 @@ else:
             try:
                 groups_imp = supabase.table("groups").select("id, name").eq("tournament_id", torneo["id"]).execute().data or []
                 for grp in groups_imp:
-                    gps = supabase.table("group_players").select("id, player_id, guest_id, player_name, handicap_index").eq("group_id", grp["id"]).execute().data or []
+                    gps = supabase.table("group_players").select("id, player_id, guest_id, player_name").eq("group_id", grp["id"]).execute().data or []
                     for gp in gps:
                         gp["group_name"] = grp["name"]
                         all_gp.append(gp)
@@ -325,7 +325,7 @@ else:
             tabla_rows = []
             for gp in all_gp:
                 pid = gp.get("player_id") or gp.get("guest_id")
-                row = {"Jugador": gp["player_name"], "Grupo": gp["group_name"], "HDC": gp.get("handicap_index", "")}
+                row = {"Jugador": gp["player_name"], "Grupo": gp["group_name"]}
                 total = 0
                 for h in hoyos:
                     v = scores_idx.get((pid, h))
