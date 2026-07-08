@@ -47,14 +47,14 @@ if st.session_state.user is None:
 
         except Exception as e:
             try:
-                _emsg = e.args[0] if e.args else "Error de login"
-                if isinstance(_emsg, str):
-                    _emsg_safe = _emsg.encode('ascii', 'replace').decode('ascii')
-                else:
-                    _emsg_safe = repr(_emsg).encode('ascii', 'replace').decode('ascii')
-            except Exception:
-                _emsg_safe = "Error de autenticacion"
-            st.error(f"Login error: {_emsg_safe}")
+                _parts = []
+                _parts.append(type(e).__name__)
+                for _a in e.args:
+                    _parts.append(repr(_a)[:200])
+                _emsg_safe = " | ".join(_parts)
+            except Exception as _e2:
+                _emsg_safe = "excepcion no capturada: " + type(e).__name__
+            st.error("Login error: " + _emsg_safe)
 
 # APP
 else:
