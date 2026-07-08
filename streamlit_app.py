@@ -295,13 +295,13 @@ else:
             torneo_labels = {f"{t.get('date','?')} - {t.get('name','?')} ({t.get('format','?')})" : t for t in all_torneos}
         except Exception:
             torneo_labels = {}
-        if not all_torneos:
+        _torneo_keys = list(torneo_labels.keys()) if torneo_labels else []
+        if not _torneo_keys:
             st.info("No hay torneos disponibles.")
-        else:
-            st.selectbox("Selecciona un torneo", list(torneo_labels.keys()), index=None, placeholder="Selecciona un torneo...", key="imp_torneo")
+        st.selectbox("Selecciona un torneo", _torneo_keys, index=None, placeholder="Selecciona un torneo...", key="imp_torneo", disabled=not _torneo_keys)
 
         _tlabel = st.session_state.get("imp_torneo")
-        torneo = torneo_labels.get(_tlabel) if _tlabel else None
+        torneo = torneo_labels.get(_tlabel) if _tlabel and torneo_labels else None
 
         all_gp = []
         scores_idx = {}
