@@ -289,7 +289,7 @@ else:
         _sel_round = next((r for r in rounds_data if r.get("round_id") == _rid_mod), None) if _rid_mod else None
 
         copts_mod = {c["name"]: c["id"] for c in get_courses()}
-        _cur_course = next((c["name"] for c in _cmod if _sel_round and c["id"] == _sel_round.get("course_id")), None)
+        _cur_course = next((c["name"] for c in get_courses() if _sel_round and c["id"] == _sel_round.get("course_id")), None)
         _cidx_mod = list(copts_mod.keys()).index(_cur_course) if _cur_course and _cur_course in copts_mod else None
         st.selectbox("Campo", list(copts_mod.keys()), index=_cidx_mod, placeholder="Campo...", key="mod_course")
 
