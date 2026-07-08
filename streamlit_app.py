@@ -46,7 +46,9 @@ if st.session_state.user is None:
             st.rerun()
 
         except Exception as e:
-            st.error(str(e).encode('ascii', 'replace').decode('ascii'))
+            _emsg = str(e)
+            _emsg_safe = _emsg.encode('ascii', 'replace').decode('ascii')
+            st.error(f"Login error: {_emsg_safe}")
 
 # APP
 else:
