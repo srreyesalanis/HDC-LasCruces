@@ -47,7 +47,9 @@ if st.session_state.user is None:
                 st.error("Login fallido: respuesta invalida de Supabase.")
 
         except Exception as e:
-            st.error("Error de autenticacion. Verifica tus credenciales.")
+            _t = type(e).__name__
+            _a0 = repr(e.args[0])[:100] if e.args else "sin args"
+            st.error("Excepcion: " + _t + " // " + _a0)
 
 # APP
 else:
