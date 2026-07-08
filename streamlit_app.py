@@ -245,7 +245,7 @@ else:
 
                 col_save, col_del = st.columns(2)
                 with col_save:
-                    if st.button("💾 Guardar cambios", use_container_width=True):
+                    if st.button("💾 Guardar cambios", use_container_width=True, key="btn_mod_guardar"):
                         supabase.table("rounds").update({
                             "total_score": int(total_mod), "tee_id": selected_tee_id_mod,
                             "course_id": selected_course_id_mod, "played_at": str(new_date)
@@ -258,14 +258,14 @@ else:
                         hdc_str = str(handicap_mod) if handicap_mod is not None else "Sin datos suficientes"
                         st.success(f"Ronda actualizada. Diferencial: {differential_mod} | Handicap Index: {hdc_str}")
                 with col_del:
-                    if st.button("🗑️ Borrar ronda", use_container_width=True, type="primary"):
+                    if st.button("🗑️ Borrar ronda", use_container_width=True, type="primary", key="btn_mod_borrar"):
                         st.session_state["confirm_delete"] = selected_round_id
 
                 if st.session_state.get("confirm_delete") == selected_round_id:
                     st.warning("⚠️ ¿Seguro que quieres borrar esta ronda? Esta acción no se puede deshacer.")
                     col_yes, col_no = st.columns(2)
                     with col_yes:
-                        if st.button("Sí, borrar", use_container_width=True):
+                        if st.button("Sí, borrar", use_container_width=True, key="btn_mod_confirmar"):
                             supabase.table("round_holes").delete().eq("round_id", selected_round_id).execute()
                             supabase.table("rounds").delete().eq("round_id", selected_round_id).execute()
                             calcular_handicap_index(supabase, player_id_mod)
@@ -273,7 +273,7 @@ else:
                             st.success("Ronda eliminada y handicap recalculado.")
                             st.rerun()
                     with col_no:
-                        if st.button("Cancelar", use_container_width=True):
+                        if st.button("Cancelar", use_container_width=True, key="btn_mod_cancelar"):
                             st.session_state["confirm_delete"] = None
                             st.rerun()
 
