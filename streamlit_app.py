@@ -33,10 +33,10 @@ if st.session_state.user is None:
 
     st.subheader("Login")
 
-    email = st.text_input("Email")
-    password = st.text_input("Password", type="password")
+    email = st.text_input("Email", key="login_email")
+    password = st.text_input("Password", type="password", key="login_password")
 
-    if st.button("Entrar"):
+    if st.button("Entrar", key="btn_login"):
 
         try:
 
@@ -90,10 +90,10 @@ else:
 
         st.header("👤 Nuevo Jugador")
 
-        name = st.text_input("Nombre")
-        email = st.text_input("Email")
+        name = st.text_input("Nombre", key="jugador_nombre")
+        email = st.text_input("Email", key="jugador_email")
 
-        if st.button("Guardar Jugador"):
+        if st.button("Guardar Jugador", key="btn_guardar_jugador"):
 
             from supabase import create_client
 
