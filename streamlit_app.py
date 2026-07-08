@@ -282,7 +282,11 @@ else:
         st.header("📥 Importar Ronda desde Torneo")
 
         # Cargar torneos (Stableford + Bola Baja) del mismo Supabase
-        all_torneos = supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).limit(50).execute().data
+        try:
+            all_torneos = supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).limit(50).execute().data
+        except Exception as _e_torneos:
+            st.error(f"Error al cargar torneos: {_e_torneos}")
+            all_torneos = []
 
         if not all_torneos:
             st.info("No hay torneos disponibles.")
