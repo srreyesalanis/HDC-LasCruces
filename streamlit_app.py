@@ -342,49 +342,54 @@ else:
         if torneo and all_gp:
             st.markdown("---")
             st.subheader("Importar jugador")
+        else:
+            st.markdown("---")
+            st.subheader("Importar jugador")
+            st.info("Selecciona un torneo con jugadores para importar.")
 
+        try:
+            players_hdc = supabase.table("players").select("id, name").order("name").execute().data or []
+        except Exception:
+            players_hdc = []
+        phdc_opts = {p["name"]: p["id"] for p in players_hdc}
+
+        try:
+            courses_imp = supabase.table("courses").select("id, name").execute().data or []
+        except Exception:
+            courses_imp = []
+        cimp_opts = {c["name"]: c["id"] for c in courses_imp}
+
+        gp_opts = {f"{gp['player_name']} (Grupo: {gp['group_name']})": gp for gp in all_gp} if all_gp else {}
+        _gp_keys = list(gp_opts.keys()) if gp_opts else [""]
+        st.selectbox("Jugador del torneo a importar", _gp_keys, index=None if gp_opts else 0, placeholder="Selecciona un jugador...", key="imp_gp")
+        st.selectbox("Jugador en HDC Las Cruces", list(phdc_opts.keys()), index=None, placeholder="Selecciona jugador HDC...", key="imp_hdc_player")
+        st.selectbox("Campo", list(cimp_opts.keys()), index=None, placeholder="Selecciona campo...", key="imp_course")
+
+        _cname_imp = st.session_state.get("imp_course")
+        _cid_imp = cimp_opts.get(_cname_imp) if _cname_imp else None
+        tee_imp_opts = {}
+        if _cid_imp:
             try:
-                players_hdc = supabase.table("players").select("id, name").order("name").execute().data or []
+                tees_imp = supabase.table("tees").select("id, color, rating, slope").eq("course_id", _cid_imp).execute().data or []
+                tee_imp_opts = {t["color"]: t for t in tees_imp}
             except Exception:
-                players_hdc = []
-            phdc_opts = {p["name"]: p["id"] for p in players_hdc}
+                tee_imp_opts = {}
 
-            try:
-                courses_imp = supabase.table("courses").select("id, name").execute().data or []
-            except Exception:
-                courses_imp = []
-            cimp_opts = {c["name"]: c["id"] for c in courses_imp}
+        _timp_keys = list(tee_imp_opts.keys()) if tee_imp_opts else [""]
+        st.selectbox("Tees", _timp_keys, index=None if tee_imp_opts else 0, placeholder="Tees...", key="imp_tee")
+        st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="imp_date")
 
-            gp_opts = {f"{gp['player_name']} (Grupo: {gp['group_name']})": gp for gp in all_gp}
-            st.selectbox("Jugador del torneo a importar", list(gp_opts.keys()), index=None, placeholder="Selecciona un jugador...", key="imp_gp")
-            st.selectbox("Jugador en HDC Las Cruces", list(phdc_opts.keys()), index=None, placeholder="Selecciona jugador HDC...", key="imp_hdc_player")
-            st.selectbox("Campo", list(cimp_opts.keys()), index=None, placeholder="Selecciona campo...", key="imp_course")
+        _gp_label = st.session_state.get("imp_gp")
+        _gp_sel = gp_opts.get(_gp_label) if _gp_label else None
+        _pid_sel = (_gp_sel.get("player_id") or _gp_sel.get("guest_id")) if _gp_sel else None
 
-            _cname_imp = st.session_state.get("imp_course")
-            _cid_imp = cimp_opts.get(_cname_imp) if _cname_imp else None
-            tee_imp_opts = {}
-            if _cid_imp:
-                try:
-                    tees_imp = supabase.table("tees").select("id, color, rating, slope").eq("course_id", _cid_imp).execute().data or []
-                    tee_imp_opts = {t["color"]: t for t in tees_imp}
-                except Exception:
-                    tee_imp_opts = {}
+        _fimp = pd.DataFrame({"Hoyo": list(range(1, 10)),  "Score": [scores_idx.get((_pid_sel, h), 0) for h in range(1, 10)]})
+        _bimp = pd.DataFrame({"Hoyo": list(range(10, 19)), "Score": [scores_idx.get((_pid_sel, h), 0) for h in range(10, 19)]})
 
-            _timp_keys = list(tee_imp_opts.keys()) if tee_imp_opts else [""]
-            st.selectbox("Tees", _timp_keys, index=None if tee_imp_opts else 0, placeholder="Tees...", key="imp_tee")
-            st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="imp_date")
-
-            _gp_label = st.session_state.get("imp_gp")
-            _gp_sel = gp_opts.get(_gp_label) if _gp_label else None
-            _pid_sel = (_gp_sel.get("player_id") or _gp_sel.get("guest_id")) if _gp_sel else None
-
-            _fimp = pd.DataFrame({"Hoyo": list(range(1, 10)),  "Score": [scores_idx.get((_pid_sel, h), 0) for h in range(1, 10)]})
-            _bimp = pd.DataFrame({"Hoyo": list(range(10, 19)), "Score": [scores_idx.get((_pid_sel, h), 0) for h in range(10, 19)]})
-
-            st.subheader("Front 9")
-            fimp_ed = st.data_editor(_fimp, hide_index=True, use_container_width=True, key="imp_front")
-            st.subheader("Back 9")
-            bimp_ed = st.data_editor(_bimp, hide_index=True, use_container_width=True, key="imp_back")
+        st.subheader("Front 9")
+        fimp_ed = st.data_editor(_fimp, hide_index=True, use_container_width=True, key="imp_front")
+        st.subheader("Back 9")
+        bimp_ed = st.data_editor(_bimp, hide_index=True, use_container_width=True, key="imp_back")
 
             ft_imp = fimp_ed["Score"].sum()
             bt_imp = bimp_ed["Score"].sum()
