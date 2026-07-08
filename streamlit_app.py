@@ -117,7 +117,7 @@ else:
         courses = supabase.table("courses").select("*").execute().data
         course_options = {c["name"]: c["id"] for c in courses}
 
-        selected_course_name = st.selectbox("Selecciona el Campo", list(course_options.keys()), index=None, placeholder="Selecciona un campo...")
+        selected_course_name = st.selectbox("Selecciona el Campo", list(course_options.keys()), index=None, placeholder="Selecciona un campo...", key="ronda_course")
 
         if selected_course_name:
             selected_course_id = course_options[selected_course_name]
@@ -125,7 +125,7 @@ else:
             tees = supabase.table("tees").select("*").eq("course_id", selected_course_id).execute().data
             tee_options = {t["color"]: t["id"] for t in tees}
 
-            selected_tee_name = st.selectbox("Selecciona las Tees", list(tee_options.keys()), index=None, placeholder="Selecciona las tees...")
+            selected_tee_name = st.selectbox("Selecciona las Tees", list(tee_options.keys()), index=None, placeholder="Selecciona las tees...", key="ronda_tee")
 
             if selected_tee_name:
                 selected_tee_id = tee_options[selected_tee_name]
@@ -138,7 +138,7 @@ else:
                 players_response = supabase.table("players").select("*").order("name").execute().data
                 player_options = {p["name"]: p["id"] for p in players_response}
 
-                selected_player_name = st.selectbox("Jugador", list(player_options.keys()), index=None, placeholder="Selecciona un jugador...")
+                selected_player_name = st.selectbox("Jugador", list(player_options.keys()), index=None, placeholder="Selecciona un jugador...", key="ronda_player")
 
                 if selected_player_name:
                     player_id = player_options[selected_player_name]
