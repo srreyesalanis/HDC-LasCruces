@@ -33,23 +33,29 @@ if st.session_state.user is None:
     if st.button("Entrar"):
 
         try:
-
-            response = supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
+            import io, sys
+            _old_stdout = sys.stdout
+            _old_stderr = sys.stderr
+            sys.stdout = io.TextIOWrapper(io.BytesIO(), encoding='utf-8')
+            sys.stderr = io.TextIOWrapper(io.BytesIO(), encoding='utf-8')
+            try:
+                response = supabase.auth.sign_in_with_password({
+                    "email": email,
+                    "password": password
+                })
+            finally:
+                sys.stdout = _old_stdout
+                sys.stderr = _old_stderr
 
             if response and response.user:
                 st.session_state.user = response.user
                 st.success("Login correcto")
                 st.rerun()
             else:
-                st.error("Login fallido: respuesta invalida de Supabase.")
+                st.error("Login fallido: respuesta invalida.")
 
         except Exception as e:
-            _t = type(e).__name__
-            _a0 = repr(e.args[0])[:100] if e.args else "sin args"
-            st.error("Excepcion: " + _t + " // " + _a0)
+            st.error("Error de autenticacion. Verifica tus credenciales.")
 
 # APP
 else:
