@@ -71,7 +71,11 @@ else:
 
             st.rerun()
 
-    st.markdown(f"Bienvenido **{st.session_state.user.email}**")
+    try:
+        _user_email = st.session_state.user.email
+    except Exception:
+        _user_email = "usuario"
+    st.markdown(f"Bienvenido **{_user_email}**")
     st.markdown("---")
 
     tab_jugador, tab_ronda, tab_mod, tab_import = st.tabs(["Crear Jugador", "Crear Ronda", "Modificar Ronda", "Importar Ronda"])
@@ -289,7 +293,10 @@ else:
         except Exception:
             all_torneos = []
 
-        torneo_labels = {f"{t['date']} - {t['name']} ({t.get('format', '?')})" : t for t in all_torneos}
+        try:
+            torneo_labels = {f"{t.get('date','?')} - {t.get('name','?')} ({t.get('format','?')})" : t for t in all_torneos}
+        except Exception:
+            torneo_labels = {}
         if not all_torneos:
             st.info("No hay torneos disponibles.")
         else:
@@ -311,7 +318,7 @@ else:
                 scores_raw = supabase.table("tournament_scores").select("player_id, guest_id, hole_number, strokes").eq("tournament_id", torneo["id"]).execute().data or []
                 for s in scores_raw:
                     pid = s.get("player_id") or s.get("guest_id")
-                    scores_idx[(pid, s["hole_number"])] = s["strokes"]
+                    scores_idx[(pid, int(s["hole_number"]))] = s["strokes"]
             except Exception as _e:
                 st.error(f"Error cargando torneo: {_e}")
 
