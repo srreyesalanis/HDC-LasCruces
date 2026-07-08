@@ -16,6 +16,120 @@ key = st.secrets["SUPABASE_KEY"]
 
 supabase = create_client(url, key)
 
+@st.cache_data(ttl=30)
+def get_courses():
+    try:
+        return supabase.table("courses").select("*").execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=30)
+def get_players():
+    try:
+        return supabase.table("players").select("*").order("name").execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=30)
+def get_tees(course_id):
+    try:
+        return supabase.table("tees").select("*").eq("course_id", course_id).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_rounds(player_id):
+    try:
+        return supabase.table("rounds").select("*").eq("player_id", player_id).order("played_at", desc=True).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_torneos():
+    try:
+        return supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_grupos(torneo_id):
+    try:
+        return supabase.table("groups").select("id, name").eq("tournament_id", torneo_id).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_group_players(group_id):
+    try:
+        return supabase.table("group_players").select("id, player_id, guest_id, player_name").eq("group_id", group_id).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_tournament_scores(torneo_id):
+    try:
+        return supabase.table("tournament_scores").select("player_id, guest_id, hole_number, strokes").eq("tournament_id", torneo_id).execute().data or []
+    except Exception:
+        return []
+
+
+@st.cache_data(ttl=30)
+def get_courses():
+    try:
+        return supabase.table("courses").select("*").execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=30)
+def get_players():
+    try:
+        return supabase.table("players").select("*").order("name").execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=30)
+def get_tees(course_id):
+    try:
+        return supabase.table("tees").select("*").eq("course_id", course_id).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_rounds(player_id):
+    try:
+        return supabase.table("rounds").select("*").eq("player_id", player_id).order("played_at", desc=True).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_torneos():
+    try:
+        return supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_grupos(torneo_id):
+    try:
+        return supabase.table("groups").select("id, name").eq("tournament_id", torneo_id).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_group_players(group_id):
+    try:
+        return supabase.table("group_players").select("id, player_id, guest_id, player_name").eq("group_id", group_id).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_tournament_scores(torneo_id):
+    try:
+        return supabase.table("tournament_scores").select("player_id, guest_id, hole_number, strokes").eq("tournament_id", torneo_id).execute().data or []
+    except Exception:
+        return []
+
+
 st.title("⛳ Golf Handicap - Las Cruces")
 
 # Session state
@@ -99,32 +213,20 @@ else:
 
         st.header("Nueva Ronda")
 
-        try:
-            _crs = supabase.table("courses").select("*").execute().data or []
-        except Exception:
-            _crs = []
-        course_options = {c["name"]: c["id"] for c in _crs}
+        course_options = {c["name"]: c["id"] for c in get_courses()}
 
         st.selectbox("Campo", list(course_options.keys()), index=None, placeholder="Selecciona un campo...", key="ronda_course")
 
         tee_options = {}
         if st.session_state.get("ronda_course") and course_options:
-            try:
-                _cid = course_options.get(st.session_state["ronda_course"])
-                if _cid:
-                    _td = supabase.table("tees").select("*").eq("course_id", _cid).execute().data or []
-                    tee_options = {t["color"]: t for t in _td}
-            except Exception:
-                tee_options = {}
+            _cid = course_options.get(st.session_state["ronda_course"])
+            if _cid:
+                tee_options = {t["color"]: t for t in get_tees(_cid)}
 
         _tk = list(tee_options.keys()) if tee_options else [""]
         st.selectbox("Tees", _tk, index=None if tee_options else 0, placeholder="Tees...", key="ronda_tee")
 
-        try:
-            _pls = supabase.table("players").select("*").order("name").execute().data or []
-        except Exception:
-            _pls = []
-        player_options = {p["name"]: p["id"] for p in _pls}
+        player_options = {p["name"]: p["id"] for p in get_players()}
 
         st.selectbox("Jugador", list(player_options.keys()), index=None, placeholder="Selecciona un jugador...", key="ronda_player")
         round_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="ronda_date")
@@ -168,21 +270,12 @@ else:
 
         st.header("Modificar Ronda")
 
-        try:
-            _pmod = supabase.table("players").select("*").order("name").execute().data or []
-        except Exception:
-            _pmod = []
-        popts_mod = {p["name"]: p["id"] for p in _pmod}
+        popts_mod = {p["name"]: p["id"] for p in get_players()}
 
         st.selectbox("Jugador", list(popts_mod.keys()), index=None, placeholder="Selecciona un jugador...", key="mod_player")
 
         _pid_mod = popts_mod.get(st.session_state.get("mod_player", ""))
-        rounds_data = []
-        if _pid_mod:
-            try:
-                rounds_data = supabase.table("rounds").select("*").eq("player_id", _pid_mod).order("played_at", desc=True).execute().data or []
-            except Exception:
-                rounds_data = []
+        rounds_data = get_rounds(_pid_mod) if _pid_mod else []
 
         def _rlabel(r):
             diff = r.get("differential", "N/A")
@@ -195,22 +288,13 @@ else:
         _rid_mod = round_opts_mod.get(st.session_state.get("mod_round", ""))
         _sel_round = next((r for r in rounds_data if r.get("round_id") == _rid_mod), None) if _rid_mod else None
 
-        try:
-            _cmod = supabase.table("courses").select("*").execute().data or []
-        except Exception:
-            _cmod = []
-        copts_mod = {c["name"]: c["id"] for c in _cmod}
+        copts_mod = {c["name"]: c["id"] for c in get_courses()}
         _cur_course = next((c["name"] for c in _cmod if _sel_round and c["id"] == _sel_round.get("course_id")), None)
         _cidx_mod = list(copts_mod.keys()).index(_cur_course) if _cur_course and _cur_course in copts_mod else None
         st.selectbox("Campo", list(copts_mod.keys()), index=_cidx_mod, placeholder="Campo...", key="mod_course")
 
         _cid_mod = copts_mod.get(st.session_state.get("mod_course", ""))
-        tee_list_mod = []
-        if _cid_mod:
-            try:
-                tee_list_mod = supabase.table("tees").select("*").eq("course_id", _cid_mod).execute().data or []
-            except Exception:
-                tee_list_mod = []
+        tee_list_mod = get_tees(_cid_mod) if _cid_mod else []
         topts_mod = {t["color"]: t for t in tee_list_mod}
         _cur_tee = next((t["color"] for t in tee_list_mod if _sel_round and t["id"] == _sel_round.get("tee_id")), None)
         _tidx_mod = list(topts_mod.keys()).index(_cur_tee) if _cur_tee and _cur_tee in topts_mod else None
@@ -286,10 +370,7 @@ else:
 
         st.header("Importar Ronda desde Torneo")
 
-        try:
-            all_torneos = supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).execute().data or []
-        except Exception:
-            all_torneos = []
+        all_torneos = get_torneos()
 
         try:
             torneo_labels = {f"{t.get('date','?')} - {t.get('name','?')} ({t.get('format','?')})" : t for t in all_torneos}
@@ -307,13 +388,13 @@ else:
         scores_idx = {}
         if torneo:
             try:
-                groups_imp = supabase.table("groups").select("id, name").eq("tournament_id", torneo["id"]).execute().data or []
+                groups_imp = get_grupos(torneo["id"])
                 for grp in groups_imp:
-                    gps = supabase.table("group_players").select("id, player_id, guest_id, player_name").eq("group_id", grp["id"]).execute().data or []
+                    gps = get_group_players(grp["id"])
                     for gp in gps:
                         gp["group_name"] = grp["name"]
                         all_gp.append(gp)
-                scores_raw = supabase.table("tournament_scores").select("player_id, guest_id, hole_number, strokes").eq("tournament_id", torneo["id"]).execute().data or []
+                scores_raw = get_tournament_scores(torneo["id"])
                 for s in scores_raw:
                     pid = s.get("player_id") or s.get("guest_id")
                     scores_idx[(pid, int(s["hole_number"]))] = s["strokes"]
