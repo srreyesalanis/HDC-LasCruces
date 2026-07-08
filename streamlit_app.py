@@ -19,6 +19,12 @@ supabase = create_client(url, key)
 st.title("⛳ Golf Handicap - Las Cruces")
 
 # Session state
+# Version check — invalida session state viejo
+if st.session_state.get("_app_version") != "v4":
+    _keep = {k: v for k, v in st.session_state.items() if k in ("user",)}
+    st.session_state.clear()
+    for k, v in _keep.items(): st.session_state[k] = v
+    st.session_state["_app_version"] = "v4"
 if "user" not in st.session_state:
     st.session_state.user = None
 
