@@ -391,31 +391,31 @@ else:
         st.subheader("Back 9")
         bimp_ed = st.data_editor(_bimp, hide_index=True, use_container_width=True, key="imp_back")
 
-            ft_imp = fimp_ed["Score"].sum()
-            bt_imp = bimp_ed["Score"].sum()
-            tt_imp = ft_imp + bt_imp
-            st.write(f"Front: {ft_imp} | Back: {bt_imp} | Total: {tt_imp}")
+        ft_imp = fimp_ed["Score"].sum()
+        bt_imp = bimp_ed["Score"].sum()
+        tt_imp = ft_imp + bt_imp
+        st.write(f"Front: {ft_imp} | Back: {bt_imp} | Total: {tt_imp}")
 
-            if st.button("Importar ronda", use_container_width=True, key="btn_importar", type="primary"):
-                _phdc_sel = st.session_state.get("imp_hdc_player")
-                _tname_imp = st.session_state.get("imp_tee")
-                if not _phdc_sel:
-                    st.error("Selecciona el jugador HDC.")
-                elif not _cid_imp or not _tname_imp or not _tname_imp in tee_imp_opts:
-                    st.error("Selecciona campo y tees.")
-                else:
-                    try:
-                        _tee_imp = tee_imp_opts[_tname_imp]
-                        _phdc_id = phdc_opts[_phdc_sel]
-                        _rid_imp = str(uuid.uuid4())
-                        supabase.table("rounds").insert({"round_id": _rid_imp, "player_id": _phdc_id, "course_id": _cid_imp, "tee_id": _tee_imp["id"], "played_at": str(st.session_state["imp_date"]), "total_score": int(tt_imp)}).execute()
-                        for _, row in pd.concat([fimp_ed, bimp_ed]).iterrows():
-                            supabase.table("round_holes").insert({"round_id": _rid_imp, "hole_number": int(row["Hoyo"]), "strokes": int(row["Score"])}).execute()
-                        _adj_imp = calcular_total_ajustado(supabase, _cid_imp, _rid_imp)
-                        _diff_imp = calcular_differential(supabase, _adj_imp, _tee_imp["rating"], _rid_imp, _tee_imp["slope"])
-                        _hdc_imp = calcular_handicap_index(supabase, _phdc_id)
-                        _hs = str(_hdc_imp) if _hdc_imp is not None else "Sin datos"
-                        st.success(f"Ronda importada. Dif: {_diff_imp} | HDC: {_hs}")
-                    except Exception as _e:
-                        st.error(f"Error al importar: {_e}")
+        if st.button("Importar ronda", use_container_width=True, key="btn_importar", type="primary"):
+            _phdc_sel = st.session_state.get("imp_hdc_player")
+            _tname_imp = st.session_state.get("imp_tee")
+            if not _phdc_sel:
+                st.error("Selecciona el jugador HDC.")
+            elif not _cid_imp or not _tname_imp or not _tname_imp in tee_imp_opts:
+                st.error("Selecciona campo y tees.")
+            else:
+                try:
+                    _tee_imp = tee_imp_opts[_tname_imp]
+                    _phdc_id = phdc_opts[_phdc_sel]
+                    _rid_imp = str(uuid.uuid4())
+                    supabase.table("rounds").insert({"round_id": _rid_imp, "player_id": _phdc_id, "course_id": _cid_imp, "tee_id": _tee_imp["id"], "played_at": str(st.session_state["imp_date"]), "total_score": int(tt_imp)}).execute()
+                    for _, row in pd.concat([fimp_ed, bimp_ed]).iterrows():
+                        supabase.table("round_holes").insert({"round_id": _rid_imp, "hole_number": int(row["Hoyo"]), "strokes": int(row["Score"])}).execute()
+                    _adj_imp = calcular_total_ajustado(supabase, _cid_imp, _rid_imp)
+                    _diff_imp = calcular_differential(supabase, _adj_imp, _tee_imp["rating"], _rid_imp, _tee_imp["slope"])
+                    _hdc_imp = calcular_handicap_index(supabase, _phdc_id)
+                    _hs = str(_hdc_imp) if _hdc_imp is not None else "Sin datos"
+                    st.success(f"Ronda importada. Dif: {_diff_imp} | HDC: {_hs}")
+                except Exception as _e:
+                    st.error(f"Error al importar: {_e}")
 
