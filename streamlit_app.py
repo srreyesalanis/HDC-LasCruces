@@ -262,10 +262,10 @@ else:
                         st.session_state["confirm_delete"] = selected_round_id
 
                 if st.session_state.get("confirm_delete") == selected_round_id:
-                    st.warning("⚠️ ¿Seguro que quieres borrar esta ronda? Esta acción no se puede deshacer.")
+                    st.warning("Seguro que quieres borrar esta ronda? Esta accion no se puede deshacer.")
                     col_yes, col_no = st.columns(2)
                     with col_yes:
-                        if st.button("Sí, borrar", use_container_width=True):
+                        if st.button("Si, borrar", use_container_width=True):
                             supabase.table("round_holes").delete().eq("round_id", selected_round_id).execute()
                             supabase.table("rounds").delete().eq("round_id", selected_round_id).execute()
                             calcular_handicap_index(supabase, player_id_mod)
