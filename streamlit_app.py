@@ -46,7 +46,7 @@ if st.session_state.user is None:
             st.rerun()
 
         except Exception as e:
-            st.error(str(e))
+            st.error(str(e).encode('ascii', 'replace').decode('ascii'))
 
 # APP
 else:
