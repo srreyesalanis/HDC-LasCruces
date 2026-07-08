@@ -111,69 +111,70 @@ else:
 
         st.header("Nueva Ronda")
 
-        courses = supabase.table("courses").select("*").execute().data
+        try:
+            courses = supabase.table("courses").select("*").execute().data or []
+        except Exception:
+            courses = []
         course_options = {c["name"]: c["id"] for c in courses}
 
-        selected_course_name = st.selectbox("Selecciona el Campo", list(course_options.keys()), index=None, placeholder="Selecciona un campo...")
+        st.selectbox("Selecciona el Campo", list(course_options.keys()), index=None, placeholder="Selecciona un campo...", key="ronda_course")
 
-        if selected_course_name:
-            selected_course_id = course_options[selected_course_name]
+        tee_options = {}
+        if st.session_state.get("ronda_course") and course_options:
+            try:
+                _cid = course_options.get(st.session_state["ronda_course"])
+                if _cid:
+                    _td = supabase.table("tees").select("*").eq("course_id", _cid).execute().data or []
+                    tee_options = {t["color"]: t for t in _td}
+            except Exception:
+                tee_options = {}
 
-            tees = supabase.table("tees").select("*").eq("course_id", selected_course_id).execute().data
-            tee_options = {t["color"]: t["id"] for t in tees}
+        _tk = list(tee_options.keys()) if tee_options else [""]
+        st.selectbox("Selecciona las Tees", _tk, index=None if tee_options else 0, placeholder="Selecciona las tees...", key="ronda_tee")
 
-            selected_tee_name = st.selectbox("Selecciona las Tees", list(tee_options.keys()), index=None, placeholder="Selecciona las tees...")
+        try:
+            _pl = supabase.table("players").select("*").order("name").execute().data or []
+        except Exception:
+            _pl = []
+        player_options = {p["name"]: p["id"] for p in _pl}
 
-            if selected_tee_name:
-                selected_tee_id = tee_options[selected_tee_name]
-                selected_tee = next(t for t in tees if t["id"] == selected_tee_id)
-                slope_rating = selected_tee["slope"]
-                course_rating = selected_tee["rating"]
+        st.selectbox("Jugador", list(player_options.keys()), index=None, placeholder="Selecciona un jugador...", key="ronda_player")
+        round_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="ronda_date")
 
-                round_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date())
+        st.subheader("Front 9")
+        front_scores = st.data_editor(pd.DataFrame({"Hoyo": list(range(1,10)), "Score": [0]*9}}), hide_index=True, use_container_width=True, key={q}ronda_front{q})
+        st.subheader("Back 9")
+        back_scores = st.data_editor(pd.DataFrame({"Hoyo": list(range(10,19)), "Score": [0]*9}}), hide_index=True, use_container_width=True, key={q}ronda_back{q})
 
-                players_response = supabase.table("players").select("*").order("name").execute().data
-                player_options = {p["name"]: p["id"] for p in players_response}
+        front_total = front_scores["Score"].sum()
+        back_total  = back_scores["Score"].sum()
+        total = front_total + back_total
+        st.write(f"Front: {front_total} | Back: {back_total} | Total: {total}")
 
-                selected_player_name = st.selectbox("Jugador", list(player_options.keys()), index=None, placeholder="Selecciona un jugador...")
-
-                if selected_player_name:
-                    player_id = player_options[selected_player_name]
-
-                    front_df = pd.DataFrame({"Hoyo": list(range(1,10)),  "Score": [0]*9})
-                    back_df  = pd.DataFrame({"Hoyo": list(range(10,19)), "Score": [0]*9})
-
-                    st.subheader("Front 9")
-                    front_scores = st.data_editor(front_df, hide_index=True, use_container_width=True)
-                    st.subheader("Back 9")
-                    back_scores  = st.data_editor(back_df,  hide_index=True, use_container_width=True)
-
-                    front_total = front_scores["Score"].sum()
-                    back_total  = back_scores["Score"].sum()
-                    total = front_total + back_total
-
-                    st.markdown("---")
-                    st.write(f"Front: {front_total} | Back: {back_total} | Total: {total}")
-
-                    if st.button("Guardar Ronda"):
-                        round_id = str(uuid.uuid4())
-                        supabase.table("rounds").insert({
-                            "round_id": round_id, "player_id": player_id,
-                            "course_id": selected_course_id, "tee_id": selected_tee_id,
-                            "played_at": str(round_date), "total_score": int(total),
-                        }).execute()
+        if st.button("Guardar Ronda", key="btn_guardar_ronda", use_container_width=True, type="primary"):
+            _pname = st.session_state.get("ronda_player")
+            _cname = st.session_state.get("ronda_course")
+            _tname = st.session_state.get("ronda_tee")
+            if not _pname or not _cname or not _tname:
+                st.error("Selecciona campo, tees y jugador.")
+            else:
+                try:
+                    _tee = tee_options.get(_tname)
+                    if not _tee:
+                        st.error("Tee no encontrado.")
+                    else:
+                        _pid  = player_options[_pname]
+                        _cid2 = course_options[_cname]
+                        _rid  = str(uuid.uuid4())
+                        supabase.table("rounds").insert({"round_id": _rid, "player_id": _pid, "course_id": _cid2, "tee_id": _tee["id"], "played_at": str(round_date), "total_score": int(total)}}).execute()
                         for _, row in pd.concat([front_scores, back_scores]).iterrows():
-                            supabase.table("round_holes").insert({
-                                "round_id": round_id, "hole_number": int(row["Hoyo"]), "strokes": int(row["Score"])
-                            }).execute()
-                        adjusted_total = calcular_total_ajustado(supabase, selected_course_id, round_id)
-                        differential   = calcular_differential(supabase, adjusted_total, course_rating, round_id, slope_rating)
-                        handicap_index = calcular_handicap_index(supabase, player_id)
+                            supabase.table("round_holes").insert({"round_id": _rid, "hole_number": int(row["Hoyo"]), "strokes": int(row["Score"])}}).execute()
+                        _adj  = calcular_total_ajustado(supabase, _cid2, _rid)
+                        _diff = calcular_differential(supabase, _adj, _tee["rating"], _rid, _tee["slope"])
+                        _hdc  = calcular_handicap_index(supabase, _pid)
                         st.success("Ronda guardada")
-
-
-
-
+                except Exception:
+                    st.error("Error al guardar ronda.")
 
     # PAGINA MODIFICAR RONDA
     with tab_mod:
