@@ -279,7 +279,7 @@ else:
 
     # PAGINA IMPORTAR RONDA
     with tab_import:
-        st.header("📥 Importar Ronda desde Torneo")
+        st.header("Importar Ronda desde Torneo")
 
         # Cargar torneos
         try:
@@ -292,7 +292,7 @@ else:
             st.info("No hay torneos disponibles.")
         else:
             torneo_labels = {
-                f"{t['date']} — {t['name']} ({t.get('format','?')})": t
+                f"{t['date']} - {t['name']} ({t.get('format','?')})": t
                 for t in all_torneos
             }
             selected_torneo_label = st.selectbox(
@@ -329,7 +329,7 @@ else:
                         scores_idx[(pid, s["hole_number"])] = s["strokes"]
 
                     st.markdown("---")
-                    st.subheader("🔍 Scores hoyo por hoyo")
+                    st.subheader("Scores hoyo por hoyo")
 
                     # Tabla resumen
                     hoyos = list(range(1, 19))
@@ -349,7 +349,7 @@ else:
                     st.dataframe(df_imp, use_container_width=True, hide_index=True)
 
                     st.markdown("---")
-                    st.subheader("📤 Importar jugador")
+                    st.subheader("Importar jugador")
 
                     # Cargar jugadores registrados en HDC
                     players_hdc = supabase.table("players").select("id, name").order("name").execute().data
@@ -415,7 +415,7 @@ else:
                         total_t = front_t + back_t
                         st.write(f"Front: {front_t} | Back: {back_t} | Total: {total_t}")
 
-                        if st.button("📥 Importar ronda", use_container_width=True, key="btn_importar", type="primary"):
+                        if st.button("Importar ronda", use_container_width=True, key="btn_importar", type="primary"):
                             if not player_hdc_sel:
                                 st.error("Selecciona el jugador HDC.")
                             elif not course_sel_id or not tee_sel_name:
@@ -445,5 +445,5 @@ else:
                                 differential = calcular_differential(supabase, adjusted, tee_imp["rating"], round_id_imp, tee_imp["slope"])
                                 handicap_index = calcular_handicap_index(supabase, player_hdc_id)
                                 hdc_str = str(handicap_index) if handicap_index is not None else "Sin datos suficientes"
-                                st.success(f"✅ Ronda importada. Diferencial: {differential} | Handicap Index: {hdc_str}")
+                                st.success(f"Ronda importada. Diferencial: {differential} | Handicap Index: {hdc_str}")
 
