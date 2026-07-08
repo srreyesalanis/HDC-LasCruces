@@ -39,22 +39,15 @@ if st.session_state.user is None:
                 "password": password
             })
 
-            st.session_state.user = response.user
-
-            st.success("Login correcto")
-
-            st.rerun()
+            if response and response.user:
+                st.session_state.user = response.user
+                st.success("Login correcto")
+                st.rerun()
+            else:
+                st.error("Login fallido: respuesta invalida de Supabase.")
 
         except Exception as e:
-            try:
-                _parts = []
-                _parts.append(type(e).__name__)
-                for _a in e.args:
-                    _parts.append(repr(_a)[:200])
-                _emsg_safe = " | ".join(_parts)
-            except Exception as _e2:
-                _emsg_safe = "excepcion no capturada: " + type(e).__name__
-            st.error("Login error: " + _emsg_safe)
+            st.error("Error de autenticacion. Verifica tus credenciales.")
 
 # APP
 else:
