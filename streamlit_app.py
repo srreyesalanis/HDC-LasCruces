@@ -19,12 +19,6 @@ supabase = create_client(url, key)
 st.title("⛳ Golf Handicap - Las Cruces")
 
 # Session state
-# Version check — invalida session state viejo
-if st.session_state.get("_app_version") != "v4":
-    _keep = {k: v for k, v in st.session_state.items() if k in ("user",)}
-    st.session_state.clear()
-    for k, v in _keep.items(): st.session_state[k] = v
-    st.session_state["_app_version"] = "v4"
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -33,10 +27,10 @@ if st.session_state.user is None:
 
     st.subheader("Login")
 
-    email = st.text_input("Email", key="login_email")
-    password = st.text_input("Password", type="password", key="login_password")
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
 
-    if st.button("Entrar", key="btn_login"):
+    if st.button("Entrar"):
 
         try:
 
@@ -90,10 +84,10 @@ else:
 
         st.header("👤 Nuevo Jugador")
 
-        name = st.text_input("Nombre", key="jugador_nombre")
-        email = st.text_input("Email", key="jugador_email")
+        name = st.text_input("Nombre")
+        email = st.text_input("Email")
 
-        if st.button("Guardar Jugador", key="btn_guardar_jugador"):
+        if st.button("Guardar Jugador"):
 
             from supabase import create_client
 
@@ -123,7 +117,7 @@ else:
         courses = supabase.table("courses").select("*").execute().data
         course_options = {c["name"]: c["id"] for c in courses}
 
-        selected_course_name = st.selectbox("Selecciona el Campo", list(course_options.keys()), index=None, placeholder="Selecciona un campo...", key="ronda_course")
+        selected_course_name = st.selectbox("Selecciona el Campo", list(course_options.keys()), index=None, placeholder="Selecciona un campo...")
 
         if selected_course_name:
             selected_course_id = course_options[selected_course_name]
@@ -131,7 +125,7 @@ else:
             tees = supabase.table("tees").select("*").eq("course_id", selected_course_id).execute().data
             tee_options = {t["color"]: t["id"] for t in tees}
 
-            selected_tee_name = st.selectbox("Selecciona las Tees", list(tee_options.keys()), index=None, placeholder="Selecciona las tees...", key="ronda_tee")
+            selected_tee_name = st.selectbox("Selecciona las Tees", list(tee_options.keys()), index=None, placeholder="Selecciona las tees...")
 
             if selected_tee_name:
                 selected_tee_id = tee_options[selected_tee_name]
@@ -139,12 +133,12 @@ else:
                 slope_rating = selected_tee["slope"]
                 course_rating = selected_tee["rating"]
 
-                round_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="ronda_date")
+                round_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date())
 
                 players_response = supabase.table("players").select("*").order("name").execute().data
                 player_options = {p["name"]: p["id"] for p in players_response}
 
-                selected_player_name = st.selectbox("Jugador", list(player_options.keys()), index=None, placeholder="Selecciona un jugador...", key="ronda_player")
+                selected_player_name = st.selectbox("Jugador", list(player_options.keys()), index=None, placeholder="Selecciona un jugador...")
 
                 if selected_player_name:
                     player_id = player_options[selected_player_name]
@@ -153,9 +147,9 @@ else:
                     back_df  = pd.DataFrame({"Hoyo": list(range(10,19)), "Score": [0]*9})
 
                     st.subheader("Front 9")
-                    front_scores = st.data_editor(front_df, hide_index=True, use_container_width=True, key="ronda_front")
+                    front_scores = st.data_editor(front_df, hide_index=True, use_container_width=True)
                     st.subheader("Back 9")
-                    back_scores  = st.data_editor(back_df,  hide_index=True, use_container_width=True, key="ronda_back")
+                    back_scores  = st.data_editor(back_df,  hide_index=True, use_container_width=True)
 
                     front_total = front_scores["Score"].sum()
                     back_total  = back_scores["Score"].sum()
@@ -164,7 +158,7 @@ else:
                     st.markdown("---")
                     st.write(f"Front: {front_total} | Back: {back_total} | Total: {total}")
 
-                    if st.button("Guardar Ronda", key="btn_guardar_ronda"):
+                    if st.button("Guardar Ronda"):
                         round_id = str(uuid.uuid4())
                         supabase.table("rounds").insert({
                             "round_id": round_id, "player_id": player_id,
@@ -251,7 +245,7 @@ else:
 
                 col_save, col_del = st.columns(2)
                 with col_save:
-                    if st.button("💾 Guardar cambios", use_container_width=True, key="btn_mod_guardar"):
+                    if st.button("💾 Guardar cambios", use_container_width=True):
                         supabase.table("rounds").update({
                             "total_score": int(total_mod), "tee_id": selected_tee_id_mod,
                             "course_id": selected_course_id_mod, "played_at": str(new_date)
@@ -264,14 +258,14 @@ else:
                         hdc_str = str(handicap_mod) if handicap_mod is not None else "Sin datos suficientes"
                         st.success(f"Ronda actualizada. Diferencial: {differential_mod} | Handicap Index: {hdc_str}")
                 with col_del:
-                    if st.button("🗑️ Borrar ronda", use_container_width=True, type="primary", key="btn_mod_borrar"):
+                    if st.button("🗑️ Borrar ronda", use_container_width=True, type="primary"):
                         st.session_state["confirm_delete"] = selected_round_id
 
                 if st.session_state.get("confirm_delete") == selected_round_id:
                     st.warning("⚠️ ¿Seguro que quieres borrar esta ronda? Esta acción no se puede deshacer.")
                     col_yes, col_no = st.columns(2)
                     with col_yes:
-                        if st.button("Sí, borrar", use_container_width=True, key="btn_mod_confirmar"):
+                        if st.button("Sí, borrar", use_container_width=True):
                             supabase.table("round_holes").delete().eq("round_id", selected_round_id).execute()
                             supabase.table("rounds").delete().eq("round_id", selected_round_id).execute()
                             calcular_handicap_index(supabase, player_id_mod)
@@ -279,7 +273,7 @@ else:
                             st.success("Ronda eliminada y handicap recalculado.")
                             st.rerun()
                     with col_no:
-                        if st.button("Cancelar", use_container_width=True, key="btn_mod_cancelar"):
+                        if st.button("Cancelar", use_container_width=True):
                             st.session_state["confirm_delete"] = None
                             st.rerun()
 
@@ -288,11 +282,7 @@ else:
         st.header("📥 Importar Ronda desde Torneo")
 
         # Cargar torneos (Stableford + Bola Baja) del mismo Supabase
-        try:
-            all_torneos = supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).limit(50).execute().data
-        except Exception as _e_torneos:
-            st.error(f"Error al cargar torneos: {_e_torneos}")
-            all_torneos = []
+        all_torneos = supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).limit(50).execute().data
 
         if not all_torneos:
             st.info("No hay torneos disponibles.")
