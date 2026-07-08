@@ -57,7 +57,7 @@ else:
     with top_col2:
 
         logout_button = st.button(
-        "Cerrar Sesión",
+        "Cerrar Sesion",
         type="primary",
         use_container_width=True,
         key="logout_button"
@@ -71,13 +71,10 @@ else:
 
             st.rerun()
 
-    st.success(
-        f"Bienvenido {st.session_state.user.email}"
-        
-    )
+    st.markdown(f"Bienvenido **{st.session_state.user.email}**")
     st.markdown("---")
 
-    tab_jugador, tab_ronda, tab_mod, tab_import = st.tabs(["👤 Crear Jugador", "🏌️ Crear Ronda", "✏️ Modificar Ronda", "📥 Importar Ronda"])
+    tab_jugador, tab_ronda, tab_mod, tab_import = st.tabs(["Crear Jugador", "Crear Ronda", "Modificar Ronda", "Importar Ronda"])
 
     # PAGINA CREAR JUGADOR
     with tab_jugador:
