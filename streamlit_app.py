@@ -133,7 +133,7 @@ else:
                 slope_rating = selected_tee["slope"]
                 course_rating = selected_tee["rating"]
 
-                round_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date())
+                round_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="ronda_date")
 
                 players_response = supabase.table("players").select("*").order("name").execute().data
                 player_options = {p["name"]: p["id"] for p in players_response}
@@ -147,9 +147,9 @@ else:
                     back_df  = pd.DataFrame({"Hoyo": list(range(10,19)), "Score": [0]*9})
 
                     st.subheader("Front 9")
-                    front_scores = st.data_editor(front_df, hide_index=True, use_container_width=True)
+                    front_scores = st.data_editor(front_df, hide_index=True, use_container_width=True, key="ronda_front")
                     st.subheader("Back 9")
-                    back_scores  = st.data_editor(back_df,  hide_index=True, use_container_width=True)
+                    back_scores  = st.data_editor(back_df,  hide_index=True, use_container_width=True, key="ronda_back")
 
                     front_total = front_scores["Score"].sum()
                     back_total  = back_scores["Score"].sum()
@@ -158,7 +158,7 @@ else:
                     st.markdown("---")
                     st.write(f"Front: {front_total} | Back: {back_total} | Total: {total}")
 
-                    if st.button("Guardar Ronda"):
+                    if st.button("Guardar Ronda", key="btn_guardar_ronda"):
                         round_id = str(uuid.uuid4())
                         supabase.table("rounds").insert({
                             "round_id": round_id, "player_id": player_id,
