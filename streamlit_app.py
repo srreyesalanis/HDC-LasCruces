@@ -33,7 +33,7 @@ if st.session_state.user is None:
     if st.button("Entrar"):
 
         try:
-            import io, sys
+            import io, sys, traceback
             _old_stdout = sys.stdout
             _old_stderr = sys.stderr
             sys.stdout = io.TextIOWrapper(io.BytesIO(), encoding='utf-8')
@@ -55,7 +55,9 @@ if st.session_state.user is None:
                 st.error("Login fallido: respuesta invalida.")
 
         except Exception as e:
-            st.error("Error de autenticacion. Verifica tus credenciales.")
+            _tb = traceback.format_exc()
+            _tb_safe = _tb.encode('ascii', 'replace').decode('ascii')
+            st.error("Traceback: " + _tb_safe[-500:])
 
 # APP
 else:
