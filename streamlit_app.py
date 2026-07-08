@@ -1,4 +1,4 @@
-import streamlit as st
+mport streamlit as st
 import pandas as pd
 import uuid
 from datetime import date, datetime as _dt_global
@@ -15,6 +15,62 @@ url = st.secrets["SUPABASE_URL"]
 key = st.secrets["SUPABASE_KEY"]
 
 supabase = create_client(url, key)
+
+@st.cache_data(ttl=30)
+def get_courses():
+    try:
+        return supabase.table("courses").select("*").execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=30)
+def get_players():
+    try:
+        return supabase.table("players").select("*").order("name").execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=30)
+def get_tees(course_id):
+    try:
+        return supabase.table("tees").select("*").eq("course_id", course_id).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_rounds(player_id):
+    try:
+        return supabase.table("rounds").select("*").eq("player_id", player_id).order("played_at", desc=True).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_torneos():
+    try:
+        return supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_grupos(torneo_id):
+    try:
+        return supabase.table("groups").select("id, name").eq("tournament_id", torneo_id).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_group_players(group_id):
+    try:
+        return supabase.table("group_players").select("id, player_id, guest_id, player_name").eq("group_id", group_id).execute().data or []
+    except Exception:
+        return []
+
+@st.cache_data(ttl=60)
+def get_tournament_scores(torneo_id):
+    try:
+        return supabase.table("tournament_scores").select("player_id, guest_id, hole_number, strokes").eq("tournament_id", torneo_id).execute().data or []
+    except Exception:
+        return []
 
 st.title("Golf Handicap - Las Cruces")
 
@@ -88,7 +144,7 @@ else:
     )
     st.markdown("---")
 
-    tab_jugador, tab_ronda, tab_mod, tab_import = st.tabs(["Crear Jugador", "Crear Ronda", "Modificar Ronda", "Importar Ronda"])
+    tab_jugador, tab_ronda, tab_mod = st.tabs(["Crear Jugador", "Crear Ronda", "Modificar Ronda"])
 
     # PAGINA CREAR JUGADOR
     with tab_jugador:
@@ -273,174 +329,3 @@ else:
                         if st.button("Cancelar", use_container_width=True):
                             st.session_state["confirm_delete"] = None
                             st.rerun()
-
-    # PAGINA IMPORTAR RONDA
-    with tab_import:
-        st.header("Importar Ronda desde Torneo")
-
-        # Cargar torneos
-        try:
-            all_torneos = supabase.table("tournaments").select("id, name, date, format").order("date", desc=True).limit(50).execute().data or []
-        except Exception as _et:
-            st.error(f"Error cargando torneos: {_et}")
-            all_torneos = []
-
-        if not all_torneos:
-            st.info("No hay torneos disponibles.")
-        else:
-            torneo_labels = {
-                f"{t['date']} - {t['name']} ({t.get('format','?')})": t
-                for t in all_torneos
-            }
-            selected_torneo_label = st.selectbox(
-                "Selecciona un torneo",
-                list(torneo_labels.keys()),
-                index=None,
-                placeholder="Selecciona un torneo...",
-                key="imp_torneo"
-            )
-
-            if selected_torneo_label:
-                torneo = torneo_labels[selected_torneo_label]
-                torneo_id = torneo["id"]
-
-                # Cargar grupos y jugadores del torneo
-                groups_imp = supabase.table("groups").select("id, name").eq("tournament_id", torneo_id).execute().data
-                all_gp = []
-                for grp in groups_imp:
-                    gps = supabase.table("group_players").select("id, player_id, guest_id, player_name, course_handicap").eq("group_id", grp["id"]).execute().data
-                    for gp in gps:
-                        gp["group_name"] = grp["name"]
-                        all_gp.append(gp)
-
-                if not all_gp:
-                    st.warning("Este torneo no tiene jugadores registrados.")
-                else:
-                    # Cargar scores del torneo
-                    scores_imp = supabase.table("tournament_scores").select("player_id, guest_id, hole_number, strokes, group_id").eq("tournament_id", torneo_id).execute().data
-
-                    # Indice: (player_id o guest_id, hole_number) -> strokes
-                    scores_idx = {}
-                    for s in scores_imp:
-                        pid = s.get("player_id") or s.get("guest_id")
-                        scores_idx[(pid, s["hole_number"])] = s["strokes"]
-
-                    st.markdown("---")
-                    st.subheader("Scores hoyo por hoyo")
-
-                    # Tabla resumen
-                    hoyos = list(range(1, 19))
-                    tabla_rows = []
-                    for gp in all_gp:
-                        pid = gp.get("player_id") or gp.get("guest_id")
-                        row = {"Jugador": gp["player_name"], "Grupo": gp["group_name"], "HDC": gp.get("course_handicap", "-")}
-                        total = 0
-                        for h in hoyos:
-                            v = scores_idx.get((pid, h))
-                            row[f"H{h}"] = v if v is not None else "-"
-                            if v: total += v
-                        row["Total"] = total if total else "-"
-                        tabla_rows.append(row)
-
-                    df_imp = pd.DataFrame(tabla_rows)
-                    st.dataframe(df_imp, use_container_width=True, hide_index=True)
-
-                    st.markdown("---")
-                    st.subheader("Importar jugador")
-
-                    # Cargar jugadores registrados en HDC
-                    players_hdc = supabase.table("players").select("id, name").order("name").execute().data
-                    player_hdc_opts = {p["name"]: p["id"] for p in players_hdc}
-
-                    # Cargar cursos y tees
-                    courses_imp = supabase.table("courses").select("id, name").execute().data
-                    course_imp_opts = {c["name"]: c["id"] for c in courses_imp}
-
-                    # Seleccionar jugador del torneo a importar
-                    gp_opts = {f"{gp['player_name']} (Grupo: {gp['group_name']})": gp for gp in all_gp}
-                    selected_gp_label = st.selectbox(
-                        "Jugador del torneo a importar",
-                        list(gp_opts.keys()),
-                        index=None,
-                        placeholder="Selecciona un jugador...",
-                        key="imp_gp"
-                    )
-
-                    if selected_gp_label:
-                        gp_sel = gp_opts[selected_gp_label]
-                        pid_sel = gp_sel.get("player_id") or gp_sel.get("guest_id")
-
-                        # Mapear a jugador HDC
-                        player_hdc_sel = st.selectbox(
-                            "Jugador en HDC Las Cruces",
-                            list(player_hdc_opts.keys()),
-                            index=None,
-                            placeholder="Selecciona jugador HDC...",
-                            key="imp_hdc_player"
-                        )
-
-                        # Campo y tee
-                        course_sel_name = st.selectbox("Campo", list(course_imp_opts.keys()), index=None, placeholder="Campo...", key="imp_course")
-                        if course_sel_name:
-                            course_sel_id = course_imp_opts[course_sel_name]
-                            tees_sel = supabase.table("tees").select("id, color, rating, slope").eq("course_id", course_sel_id).execute().data
-                            tee_imp_opts = {t["color"]: t for t in tees_sel}
-                            tee_sel_name = st.selectbox("Tees", list(tee_imp_opts.keys()), index=None, placeholder="Tees...", key="imp_tee")
-                        else:
-                            course_sel_id = None; tee_imp_opts = {}; tee_sel_name = None
-
-                        # Fecha
-                        imp_date = st.date_input("Fecha de la ronda", value=_dt_global.now(_TZ_CST).date(), key="imp_date")
-
-                        # Scores editables del jugador seleccionado
-                        front_imp = pd.DataFrame({
-                            "Hoyo": list(range(1, 10)),
-                            "Score": [scores_idx.get((pid_sel, h)) or 0 for h in range(1, 10)]
-                        })
-                        back_imp = pd.DataFrame({
-                            "Hoyo": list(range(10, 19)),
-                            "Score": [scores_idx.get((pid_sel, h)) or 0 for h in range(10, 19)]
-                        })
-
-                        st.subheader("Front 9")
-                        front_imp_ed = st.data_editor(front_imp, hide_index=True, use_container_width=True, key="imp_front")
-                        st.subheader("Back 9")
-                        back_imp_ed  = st.data_editor(back_imp,  hide_index=True, use_container_width=True, key="imp_back")
-
-                        front_t = front_imp_ed["Score"].sum()
-                        back_t  = back_imp_ed["Score"].sum()
-                        total_t = front_t + back_t
-                        st.write(f"Front: {front_t} | Back: {back_t} | Total: {total_t}")
-
-                        if st.button("Importar ronda", use_container_width=True, key="btn_importar", type="primary"):
-                            if not player_hdc_sel:
-                                st.error("Selecciona el jugador HDC.")
-                            elif not course_sel_id or not tee_sel_name:
-                                st.error("Selecciona campo y tees.")
-                            else:
-                                tee_imp = tee_imp_opts[tee_sel_name]
-                                player_hdc_id = player_hdc_opts[player_hdc_sel]
-                                round_id_imp = str(uuid.uuid4())
-
-                                supabase.table("rounds").insert({
-                                    "round_id": round_id_imp,
-                                    "player_id": player_hdc_id,
-                                    "course_id": course_sel_id,
-                                    "tee_id": tee_imp["id"],
-                                    "played_at": str(imp_date),
-                                    "total_score": int(total_t),
-                                }).execute()
-
-                                for _, row in pd.concat([front_imp_ed, back_imp_ed]).iterrows():
-                                    supabase.table("round_holes").insert({
-                                        "round_id": round_id_imp,
-                                        "hole_number": int(row["Hoyo"]),
-                                        "strokes": int(row["Score"])
-                                    }).execute()
-
-                                adjusted = calcular_total_ajustado(supabase, course_sel_id, round_id_imp)
-                                differential = calcular_differential(supabase, adjusted, tee_imp["rating"], round_id_imp, tee_imp["slope"])
-                                handicap_index = calcular_handicap_index(supabase, player_hdc_id)
-                                hdc_str = str(handicap_index) if handicap_index is not None else "Sin datos suficientes"
-                                st.success(f"Ronda importada. Diferencial: {differential} | Handicap Index: {hdc_str}")
-
