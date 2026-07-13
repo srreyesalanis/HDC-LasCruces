@@ -215,38 +215,26 @@ else:
         # Obtener UUID del jugador seleccionado
         player_id = player_options[selected_player_name]
 
-        # FRONT 9
-        front_df = pd.DataFrame({
-            "Hoyo": pd.array([1,2,3,4,5,6,7,8,9], dtype="int32"),
-            "Score": pd.array([0,0,0,0,0,0,0,0,0], dtype="int32")
-        })
-
-        # BACK 9
-        back_df = pd.DataFrame({
-            "Hoyo": pd.array([10,11,12,13,14,15,16,17,18], dtype="int32"),
-            "Score": pd.array([0,0,0,0,0,0,0,0,0], dtype="int32")
-        })
-
+        # SCORES POR HOYO
         st.subheader("Front 9")
-
-        front_scores = st.data_editor(
-            front_df,
-            hide_index=True,
-            use_container_width=True
-        )
+        front_cols = st.columns(9)
+        front_scores_list = []
+        for i, col in enumerate(front_cols):
+            with col:
+                v = st.number_input(f"H{i+1}", min_value=0, max_value=20, value=0, step=1, key=f"cr_f{i+1}")
+                front_scores_list.append(v)
 
         st.subheader("Back 9")
-
-        back_scores = st.data_editor(
-            back_df,
-            hide_index=True,
-            use_container_width=True
-        )
+        back_cols = st.columns(9)
+        back_scores_list = []
+        for i, col in enumerate(back_cols):
+            with col:
+                v = st.number_input(f"H{i+10}", min_value=0, max_value=20, value=0, step=1, key=f"cr_b{i+10}")
+                back_scores_list.append(v)
 
         # Totales
-        front_total = front_scores["Score"].sum()
-        back_total = back_scores["Score"].sum()
-
+        front_total = sum(front_scores_list)
+        back_total = sum(back_scores_list)
         total = front_total + back_total
 
         st.markdown("---")
@@ -266,20 +254,18 @@ else:
             "total_score": int(total),
             }).execute()
 
-            for _, row in front_scores.iterrows():
-
+            for i, strokes in enumerate(front_scores_list):
                 supabase.table("round_holes").insert({
                     "round_id": round_id,
-                    "hole_number": int(row["Hoyo"]),
-                    "strokes": int(row["Score"])
+                    "hole_number": i + 1,
+                    "strokes": int(strokes)
                 }).execute()
 
-            for _, row in back_scores.iterrows():
-
+            for i, strokes in enumerate(back_scores_list):
                 supabase.table("round_holes").insert({
                     "round_id": round_id,
-                    "hole_number": int(row["Hoyo"]),
-                    "strokes": int(row["Score"])
+                    "hole_number": i + 10,
+                    "strokes": int(strokes)
                 }).execute()
 
             ###Calcular Total Ajustado
