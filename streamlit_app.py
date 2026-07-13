@@ -16,7 +16,7 @@ key = st.secrets["SUPABASE_KEY"]
 
 supabase = create_client(url, key)
 
-st.title("â›³ Golf Handicap - Las Cruces")
+st.title("⛳ Golf Handicap - Las Cruces")
 
 # Session state
 if "user" not in st.session_state:
@@ -82,14 +82,14 @@ else:
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("ðŸ‘¤ Crear Jugador", use_container_width=True):
+        if st.button("👤 Crear Jugador", use_container_width=True):
             st.session_state["page"] = "crear_jugador"
 
     with col2:
-        if st.button("🗑️🏌️ Crear Ronda", use_container_width=True):
+        if st.button("🏌️ Crear Ronda", use_container_width=True):
             st.session_state["page"] = "crear_ronda"
 
-    if st.button("â✏️ Modificar Ronda", use_container_width=True, key="btn_modificar_ronda"):
+    if st.button("✏️ Modificar Ronda", use_container_width=True, key="btn_modificar_ronda"):
         st.session_state["page"] = "modificar_ronda"
 
     if st.button("Importar Ronda", use_container_width=True, key="btn_importar_ronda"):
@@ -100,7 +100,7 @@ else:
     # PAGINA CREAR JUGADOR
     if st.session_state.get("page") == "crear_jugador":
 
-        st.header("ðŸ‘¤ Nuevo Jugador")
+        st.header("👤 Nuevo Jugador")
 
         name = st.text_input("Nombre")
         email = st.text_input("Email")
@@ -126,7 +126,7 @@ else:
     # PAGINA CREAR RONDA
     if st.session_state.get("page") == "crear_ronda":
 
-        st.header("🗑️🏌️ Nueva Ronda")
+        st.header("🏌️ Nueva Ronda")
 
 
 
@@ -300,7 +300,7 @@ else:
     # PAGINA MODIFICAR RONDA
     if st.session_state.get("page") == "modificar_ronda":
 
-        st.header("â✏️ Modificar Ronda")
+        st.header("✏️ Modificar Ronda")
 
         players_mod = supabase.table("players").select("*").order("name").execute().data
         player_options_mod = {p["name"]: p["id"] for p in players_mod}
@@ -375,7 +375,7 @@ else:
             col_save, col_del = st.columns(2)
 
             with col_save:
-                if st.button("ðŸ’¾ Guardar cambios", use_container_width=True):
+                if st.button("💾 Guardar cambios", use_container_width=True):
 
                     supabase.table("rounds").update({
                         "total_score": int(total_mod),
@@ -398,11 +398,11 @@ else:
                     st.success(f"Ronda actualizada. Diferencial: {differential_mod} | Handicap Index: {hdc_str}")
 
             with col_del:
-                if st.button("ðŸ—‘ï¸ Borrar ronda", use_container_width=True, type="primary"):
+                if st.button("🗑️ Borrar ronda", use_container_width=True, type="primary"):
                     st.session_state["confirm_delete"] = selected_round_id
 
             if st.session_state.get("confirm_delete") == selected_round_id:
-                st.warning("âš ï¸ Â¿Seguro que quieres borrar esta ronda? Esta acciÃ³n no se puede deshacer.")
+                st.warning("⚠️ Â¿Seguro que quieres borrar esta ronda? Esta acciÃ³n no se puede deshacer.")
                 col_yes, col_no = st.columns(2)
                 with col_yes:
                     if st.button("Sí, borrar", use_container_width=True):
