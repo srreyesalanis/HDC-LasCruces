@@ -53,7 +53,7 @@ if st.session_state.user is None:
 else:
 
     # LOGOUT ARRIBA DERECHA
-    top_col1, top_col2 = st.columns([8, 1])
+    top_col1, top_col2 = st.columns([6, 2])
 
     with top_col2:
 
