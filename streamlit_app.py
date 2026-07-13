@@ -1,4 +1,4 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 import uuid
 from datetime import date, datetime as _dt_global
@@ -16,7 +16,7 @@ key = st.secrets["SUPABASE_KEY"]
 
 supabase = create_client(url, key)
 
-st.title("⛳ Golf Handicap - Las Cruces")
+st.title("â›³ Golf Handicap - Las Cruces")
 
 # Session state
 if "user" not in st.session_state:
@@ -57,7 +57,7 @@ else:
     with top_col2:
 
         logout_button = st.button(
-        "Cerrar Sesión",
+        "Cerrar SesiÃ³n",
         type="primary",
         use_container_width=True,
         key="logout_button"
@@ -77,19 +77,19 @@ else:
     )
     st.markdown("---")
 
-    st.subheader("Menú Principal")
+    st.subheader("MenÃº Principal")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("👤 Crear Jugador", use_container_width=True):
+        if st.button("ðŸ‘¤ Crear Jugador", use_container_width=True):
             st.session_state["page"] = "crear_jugador"
 
     with col2:
-        if st.button("🏌️ Crear Ronda", use_container_width=True):
+        if st.button("ðŸŒï¸ Crear Ronda", use_container_width=True):
             st.session_state["page"] = "crear_ronda"
 
-    if st.button("✏️ Modificar Ronda", use_container_width=True, key="btn_modificar_ronda"):
+    if st.button("âœï¸ Modificar Ronda", use_container_width=True, key="btn_modificar_ronda"):
         st.session_state["page"] = "modificar_ronda"
 
     if st.button("Importar Ronda", use_container_width=True, key="btn_importar_ronda"):
@@ -100,19 +100,15 @@ else:
     # PAGINA CREAR JUGADOR
     if st.session_state.get("page") == "crear_jugador":
 
-        st.header("👤 Nuevo Jugador")
+        st.header("ðŸ‘¤ Nuevo Jugador")
 
         name = st.text_input("Nombre")
         email = st.text_input("Email")
 
         if st.button("Guardar Jugador"):
 
-            from supabase import create_client
 
-            SUPABASE_URL = st.secrets["SUPABASE_URL"]
-            SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
-            supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
             try:
@@ -130,14 +126,10 @@ else:
     # PAGINA CREAR RONDA
     if st.session_state.get("page") == "crear_ronda":
 
-        st.header("🏌️ Nueva Ronda")
+        st.header("ðŸŒï¸ Nueva Ronda")
 
-        from supabase import create_client
 
-        SUPABASE_URL = st.secrets["SUPABASE_URL"]
-        SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
         # =========================
         # CARGAR CAMPOS
@@ -225,14 +217,14 @@ else:
 
         # FRONT 9
         front_df = pd.DataFrame({
-            "Hoyo": [1,2,3,4,5,6,7,8,9],
-            "Score": [0,0,0,0,0,0,0,0,0]
+            "Hoyo": pd.array([1,2,3,4,5,6,7,8,9], dtype="int32"),
+            "Score": pd.array([0,0,0,0,0,0,0,0,0], dtype="int32")
         })
 
         # BACK 9
         back_df = pd.DataFrame({
-            "Hoyo": [10,11,12,13,14,15,16,17,18],
-            "Score": [0,0,0,0,0,0,0,0,0]
+            "Hoyo": pd.array([10,11,12,13,14,15,16,17,18], dtype="int32"),
+            "Score": pd.array([0,0,0,0,0,0,0,0,0], dtype="int32")
         })
 
         st.subheader("Front 9")
@@ -322,7 +314,7 @@ else:
     # PAGINA MODIFICAR RONDA
     if st.session_state.get("page") == "modificar_ronda":
 
-        st.header("✏️ Modificar Ronda")
+        st.header("âœï¸ Modificar Ronda")
 
         players_mod = supabase.table("players").select("*").order("name").execute().data
         player_options_mod = {p["name"]: p["id"] for p in players_mod}
@@ -397,7 +389,7 @@ else:
             col_save, col_del = st.columns(2)
 
             with col_save:
-                if st.button("💾 Guardar cambios", use_container_width=True):
+                if st.button("ðŸ’¾ Guardar cambios", use_container_width=True):
 
                     supabase.table("rounds").update({
                         "total_score": int(total_mod),
@@ -420,14 +412,14 @@ else:
                     st.success(f"Ronda actualizada. Diferencial: {differential_mod} | Handicap Index: {hdc_str}")
 
             with col_del:
-                if st.button("🗑️ Borrar ronda", use_container_width=True, type="primary"):
+                if st.button("ðŸ—‘ï¸ Borrar ronda", use_container_width=True, type="primary"):
                     st.session_state["confirm_delete"] = selected_round_id
 
             if st.session_state.get("confirm_delete") == selected_round_id:
-                st.warning("⚠️ ¿Seguro que quieres borrar esta ronda? Esta acción no se puede deshacer.")
+                st.warning("âš ï¸ Â¿Seguro que quieres borrar esta ronda? Esta acciÃ³n no se puede deshacer.")
                 col_yes, col_no = st.columns(2)
                 with col_yes:
-                    if st.button("Sí, borrar", use_container_width=True):
+                    if st.button("SÃ­, borrar", use_container_width=True):
                         supabase.table("round_holes").delete().eq("round_id", selected_round_id).execute()
                         supabase.table("rounds").delete().eq("round_id", selected_round_id).execute()
                         calcular_handicap_index(supabase, player_id_mod)
