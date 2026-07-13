@@ -57,7 +57,7 @@ else:
     with top_col2:
 
         logout_button = st.button(
-        "Cerrar SesiÃ³n",
+        "Cerrar Sesión",
         type="primary",
         use_container_width=True,
         key="logout_button"
@@ -77,7 +77,7 @@ else:
     )
     st.markdown("---")
 
-    st.subheader("MenÃº Principal")
+    st.subheader("Menú Principal")
 
     col1, col2 = st.columns(2)
 
@@ -402,7 +402,7 @@ else:
                     st.session_state["confirm_delete"] = selected_round_id
 
             if st.session_state.get("confirm_delete") == selected_round_id:
-                st.warning("⚠️ Â¿Seguro que quieres borrar esta ronda? Esta acciÃ³n no se puede deshacer.")
+                st.warning("⚠️ ¿Seguro que quieres borrar esta ronda? Esta acción no se puede deshacer.")
                 col_yes, col_no = st.columns(2)
                 with col_yes:
                     if st.button("Sí, borrar", use_container_width=True):
