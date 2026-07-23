@@ -98,6 +98,15 @@ else:
 
     st.markdown("---")
 
+    if st.button("🔄 Recalcular Todos los Handicaps", use_container_width=True, key="btn_recalcular_todos"):
+        with st.spinner("Recalculando handicaps..."):
+            players_all = supabase.table("players").select("id, name").execute().data
+            resultados = []
+            for p in players_all:
+                hdc = calcular_handicap_index(supabase, p["id"])
+                resultados.append(f"{p['name']}: {hdc if hdc is not None else 'Sin datos suficientes'}")
+            st.success("\n".join(resultados))
+
     # PAGINA CREAR JUGADOR
     if st.session_state.get("page") == "crear_jugador":
 
