@@ -79,6 +79,9 @@ def calcular_handicap_index(
         1
     )
 
+    # Cap máximo en 36
+    handicap_index = min(handicap_index, 36.0)
+
     # =========================
     # ACTUALIZAR GOLFER
     # =========================
