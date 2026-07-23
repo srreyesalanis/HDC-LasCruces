@@ -7,6 +7,11 @@ def calcular_handicap_index(
     los últimos 20 differentials.
     El número de rondas a promediar depende
     del total de rondas disponibles:
+      3       → 1 mejor - 2.0
+      4       → 1 mejor - 1.0
+      5       → 1 mejor
+      6       → 2 mejores - 1.0
+      7       → 2 mejores
       8       → 2 mejores + 1.0
       9-11    → 3 mejores
       12-14   → 4 mejores
@@ -14,6 +19,7 @@ def calcular_handicap_index(
       17-18   → 6 mejores
       19      → 7 mejores
       20      → 8 mejores
+    Máximo: 36
     """
 
     # =========================
@@ -33,7 +39,7 @@ def calcular_handicap_index(
     # VALIDAR RONDAS
     # =========================
     n = len(rounds)
-    if n < 8:
+    if n < 3:
         return None
 
     # =========================
@@ -47,7 +53,22 @@ def calcular_handicap_index(
     # =========================
     # DETERMINAR CUANTAS USAR
     # =========================
-    if n == 8:
+    if n == 3:
+        count = 1
+        adjustment = -2.0
+    elif n == 4:
+        count = 1
+        adjustment = -1.0
+    elif n == 5:
+        count = 1
+        adjustment = 0.0
+    elif n == 6:
+        count = 2
+        adjustment = -1.0
+    elif n == 7:
+        count = 2
+        adjustment = 0.0
+    elif n == 8:
         count = 2
         adjustment = 1.0
     elif n <= 11:
