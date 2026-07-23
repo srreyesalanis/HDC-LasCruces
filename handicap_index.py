@@ -4,8 +4,16 @@ def calcular_handicap_index(
 ):
     """
     Calcula el Handicap Index usando
-    los últimos 20 differentials
-    y tomando los mejores 8.
+    los últimos 20 differentials.
+    El número de rondas a promediar depende
+    del total de rondas disponibles:
+      8       → 2 mejores + 1.0
+      9-11    → 3 mejores
+      12-14   → 4 mejores
+      15-16   → 5 mejores
+      17-18   → 6 mejores
+      19      → 7 mejores
+      20      → 8 mejores
     """
 
     # =========================
@@ -24,27 +32,50 @@ def calcular_handicap_index(
     # =========================
     # VALIDAR RONDAS
     # =========================
-    if len(rounds) < 8:
+    n = len(rounds)
+    if n < 8:
         return None
 
     # =========================
     # EXTRAER DIFFERENTIALS
     # =========================
     differentials = [
-        float(round["differential"])
-        for round in rounds
+        float(r["differential"])
+        for r in rounds
     ]
 
     # =========================
-    # TOMAR MEJORES 8
+    # DETERMINAR CUANTAS USAR
     # =========================
-    best_8 = sorted(differentials)[:8]
+    if n == 8:
+        count = 2
+        adjustment = 1.0
+    elif n <= 11:
+        count = 3
+        adjustment = 0.0
+    elif n <= 14:
+        count = 4
+        adjustment = 0.0
+    elif n <= 16:
+        count = 5
+        adjustment = 0.0
+    elif n <= 18:
+        count = 6
+        adjustment = 0.0
+    elif n == 19:
+        count = 7
+        adjustment = 0.0
+    else:  # 20
+        count = 8
+        adjustment = 0.0
+
+    best = sorted(differentials)[:count]
 
     # =========================
     # CALCULAR PROMEDIO
     # =========================
     handicap_index = round(
-        sum(best_8) / 8,
+        sum(best) / count + adjustment,
         1
     )
 
