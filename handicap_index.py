@@ -11,8 +11,7 @@ def calcular_handicap_index(
       4       → 1 mejor - 1.0
       5       → 1 mejor
       6       → 2 mejores - 1.0
-      7       → 2 mejores
-      8       → 2 mejores + 1.0
+      7-8     → 2 mejores
       9-11    → 3 mejores
       12-14   → 4 mejores
       15-16   → 5 mejores
@@ -65,12 +64,9 @@ def calcular_handicap_index(
     elif n == 6:
         count = 2
         adjustment = -1.0
-    elif n == 7:
+    elif n == 7 or n == 8:
         count = 2
         adjustment = 0.0
-    elif n == 8:
-        count = 2
-        adjustment = 1.0
     elif n <= 11:
         count = 3
         adjustment = 0.0
